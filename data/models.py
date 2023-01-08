@@ -6,8 +6,21 @@ class Category(models.Model):
     ru_name = models.CharField(max_length=255)
     px_slug = models.CharField(max_length=255)
 
+    def __str__(self) -> str:
+        return f'{self.name} / {self.ru_name}'
+
 
 class Tag(models.Model):
+    px_id = models.IntegerField()
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=1025)
+    px_slug = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return f'{self.name}'
+
+
+class Subcategory(models.Model):
     px_id = models.IntegerField()
     name = models.CharField(max_length=255)
     ru_name = models.CharField(max_length=255)
@@ -17,6 +30,9 @@ class Tag(models.Model):
         on_delete=models.PROTECT
     )
     px_slug = models.CharField(max_length=255)
+
+    def __str__(self) -> str:
+        return f'{self.name} / {self.ru_name}'
 
 
 class Offer(models.Model):
@@ -34,19 +50,22 @@ class Offer(models.Model):
     ]
 
     px_id = models.CharField(max_length=255)
-    verified = models.BooleanField()
     sell_cur = models.CharField(
         'cryptoCurrencyCode', max_length=128, choices=CURRENCIES
     )
     buy_cur = models.CharField('fiatCurrencyCode', max_length=128)
     margin = models.FloatField()
-    price_per_cur = models.FloatField('pricePerUsd'),
-    require_verified_id: models.BooleanField()
-    payment_method_name = models.CharField(max_length=255)
+    price_per_cur = models.FloatField('pricePerUsd')
+    require_verified_id = models.BooleanField()
     tags = models.ManyToManyField('Tag', related_name='offers', blank=True)
     category = models.ForeignKey(
         'Category',
         db_column = 'category_id',
+        on_delete=models.PROTECT
+    )
+    subcategory = models.ForeignKey(
+        'Subcategory',
+        db_column = 'subcategory_id',
         on_delete=models.PROTECT
     )
     payment_method_label = models.CharField(max_length=255)
@@ -58,14 +77,17 @@ class Offer(models.Model):
     offer_type = models.CharField(
         max_length=128, choices=OFFER_TYPE, default=PX_SELL
     )
-    offer_detail = models.ForeignKey(
+    offer_detail = models.OneToOneField(
         'OfferDetail',
-        db_column = 'offer_detail_id',
         on_delete=models.CASCADE
     )
 
+    def __str__(self) -> str:
+        return f'{self.subcategory.name}'
+
 
 class OfferDetail(models.Model):
+    px_id = models.CharField(max_length=255)
     feedback_negative = models.IntegerField()
     feedback_positive = models.IntegerField()
     predefined_amount = models.JSONField(blank=True)

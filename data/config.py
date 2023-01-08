@@ -42,7 +42,7 @@ paxful_conf = {
             'dir': 'rest/v1/gift-cards/categories'
         }
     },
-    'tags': {
+    'subcategory': {
         'url': {
             'lang': {
                 'en': None,
@@ -51,7 +51,12 @@ paxful_conf = {
             'dir': 'rest/v1/gift-cards/payment-methods'
         },
         'params': {
-            'crypto_currency_id': int
+            'crypto_currency_id': 1
+        }
+    },
+    'tags': {
+        'url': {
+            'dir': 'rest/v1/tags?transformResponse=camelCase&group=gift-cards&payment-method%5B0%5D=with-any-payment-method'
         }
     }
 }
@@ -59,3 +64,74 @@ paxful_conf = {
 tags = {
 
 }
+
+# Needs rarely update
+categories = [
+    {
+        "id": 1,
+        "categoryName": "Food and restaurants",
+        "slug": "food_beverage_and_restaurants",
+        "optionsCount": 19
+    },
+    {
+        "id": 2,
+        "categoryName": "Gaming",
+        "slug": "gaming",
+        "optionsCount": 12
+    },
+    {
+        "id": 3,
+        "categoryName": "Movies and entertainment",
+        "slug": "movies_and_entertainment",
+        "optionsCount": 8
+    },
+    {
+        "id": 4,
+        "categoryName": "Department stores / retail",
+        "slug": "apparel_and_sportswear",
+        "optionsCount": 17
+    },
+    {
+        "id": 5,
+        "categoryName": "Electronics",
+        "slug": "tech_and_office",
+        "optionsCount": 8
+    },
+    {
+        "id": 6,
+        "categoryName": "Travel, Taxi and Destinations",
+        "slug": "travel_taxi_and_destinations",
+        "optionsCount": 10
+    },
+    {
+        "id": 7,
+        "categoryName": "Mobile Refills",
+        "slug": "mobile_refills",
+        "optionsCount": 5
+    },
+    {
+        "id": 8,
+        "categoryName": "Prepaid credit cards",
+        "slug": "prepaid_credit_cards",
+        "optionsCount": 10
+    },
+    {
+        "id": 9,
+        "categoryName": "Online shopping and Retail",
+        "slug": "online_shopping_and_retail",
+        "optionsCount": 21
+    },
+    {
+        "id": 10,
+        "categoryName": "Beauty",
+        "slug": "beauty",
+        "optionsCount": 4
+    },
+    {
+        "id": 11,
+        "categoryName": "Other",
+        "slug": "other_gambling",
+        "optionsCount": 8
+    }
+]
+
