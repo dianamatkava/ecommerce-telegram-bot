@@ -1,8 +1,18 @@
-paxful_links = {
+paxful_conf = {
     'domain': 'https://paxful.com',
-    'sell_tether': {
+    'headers': {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36',
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': '*/*'
+    },
+    'crypto_currency_id': {
+        'BTC': 1,
+        'USDT': 4
+    },
+    'sell': {
         'url': {
-            'dir': 'https://paxful.com/rest/v1/offers'
+            'dir': 'rest/v1/offers'
         },
         'params': {
             'transformResponse':'camelCase',
@@ -12,10 +22,10 @@ paxful_links = {
             'user_badges%5B3%5D':7,
             'user_badges%5B4%5D':6,
             'user_badges%5B5%5D':5,
+            'crypto_currency_id': int,
             'withFavorites':'true',
-            'crypto_currency_id':2,
             'is_payment_method_localized':0,
-            'visitor_country_has_changed':'false',
+            'visitor_country_has_changed':'true',
             'users_country_iso':'WORLDWIDE',
             'visitor_country_iso':'WORLDWIDE',
             'group':'gift-cards',
@@ -25,24 +35,27 @@ paxful_links = {
     },
     'categories': {
         'url': {
-            'lang': [None, 'ru'],
+            'lang': {
+                'en': None,
+                'ru': 'ru'
+            },
             'dir': 'rest/v1/gift-cards/categories'
         }
     },
-    'sub_categories': {
+    'tags': {
         'url': {
-            'lang': ['', 'ru'],
-            'dir': 'rest/v1/gift-cards/categories'
+            'lang': {
+                'en': None,
+                'ru': 'ru'
+            },
+            'dir': 'rest/v1/gift-cards/payment-methods'
         },
         'params': {
-            'crypto_currency_id': {
-                'BTC': 1,
-                'USDT': 2
-            }
+            'crypto_currency_id': int
         }
     }
 }
 
-data = {'transformResponse':'camelCase',
-            'user_badges%5B0%5D':1,
-            'user_badges%5B1%5D':2,}
+tags = {
+
+}

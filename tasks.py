@@ -1,2 +1,0 @@
-def getPaxfullOffers():
-    pass
