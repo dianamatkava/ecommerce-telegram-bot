@@ -5,7 +5,7 @@ django.setup()
 
 from telegram import (
     InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton,
-    ReplyKeyboardMarkup, InputMediaPhoto, Re
+    ReplyKeyboardMarkup, InputMediaPhoto
 )
 from telegram.ext.updater import Updater
 from telegram.update import Update
@@ -39,15 +39,17 @@ def contact(update: Update, context: CallbackContext):
     update.message.reply_text("Wait for the support team response")
 
 def gifts(update: Update, context: CallbackContext):
-    buttons = [
-        [InlineKeyboardButton('Gift 1')],
-        [InlineKeyboardButton('Gift 2')],
-        [InlineKeyboardButton('Gift 3')],
+    keyboard = [
+        [
+            InlineKeyboardButton("Option 1", callback_data="1"),
+            InlineKeyboardButton("Option 2", callback_data="2"),
+        ],
+        [InlineKeyboardButton("Option 3", callback_data="3")],
     ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text='Choose Gift',
-        reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
