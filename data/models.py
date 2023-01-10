@@ -85,6 +85,19 @@ class Offer(models.Model):
     def __str__(self) -> str:
         return f'{self.subcategory.name}'
 
+    def display_name(self):
+        predefined_amount = self.offer_detail.predefined_amount
+        min = self.offer_detail.fiat_amount_range_min
+        max = self.offer_detail.fiat_amount_range_max
+        res = f'{self.subcategory.name}'
+        if predefined_amount != 'null':
+            res += f' between: {predefined_amount}'
+        if min != 'null':
+            res += f' min: {min}'
+        if max != 'null':
+            res += f' max: {max}'
+
+
 
 class OfferDetail(models.Model):
     px_id = models.CharField(max_length=255)

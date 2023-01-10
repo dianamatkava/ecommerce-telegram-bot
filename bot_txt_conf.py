@@ -17,6 +17,22 @@ description_txt = {
     '''
 }
 
+category_msg = {
+    'en': 'Choose Gift category',
+    'ru': 'Выберите категорию Гифта'
+}
+
+subcategory_msg = {
+    'msg': {
+        'en': 'Choose Gift subcategory',
+        'ru': 'Выберите подкатегорию Гифта'
+    },
+    'back': {
+        'en': 'Return back to categories',
+        'ru': 'Вернуться обратно к категориям'
+    },
+}
+
 
 help_msg = {
     'en': '',
@@ -36,4 +52,27 @@ help_txt = {
     /description
     ... to be continued
     '''
+}
+
+btns = {
+    'gifts': {
+        'en': 'Gifts',
+        'ru': 'Гифты'
+    },
+    'profile': {
+        'en': 'Profile',
+        'ru': 'Профиль'
+    },
+    'settings': {
+        'en': 'Settings',
+        'ru': 'Настройки'
+    },
+    'help': {
+        'en': 'Help',
+        'ru': 'Помощь'
+    },
+    'contact': {
+        'en': 'Contact',
+        'ru': 'Контакт'
+    }
 }
