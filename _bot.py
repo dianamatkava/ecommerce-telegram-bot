@@ -18,7 +18,8 @@ from telegram.ext.filters import Filters
 from config import TG_TOKEN
 from bot_txt_conf import (
     lang, lang_txt, description_txt, btns,
-    category_msg, subcategory_msg
+    category_msg, subcategory_msg, offer_msg,
+    operations
 )
 from data.models import Category, Subcategory, Offer
 
@@ -44,7 +45,6 @@ def description(update: Update, context: CallbackContext):
         [KeyboardButton(btns['gifts'][LANG])],
         [
             KeyboardButton(btns['profile'][LANG]),
-            KeyboardButton(btns['settings'][LANG]),
             KeyboardButton(btns['help'][LANG]),
             KeyboardButton(btns['contact'][LANG])
         ],
@@ -62,9 +62,6 @@ def help(update: Update, context: CallbackContext):
 def contact(update: Update, context: CallbackContext):
     update.message.reply_text("Wait for the support team response")
 
-def settings(update: Update, context: CallbackContext):
-    update.message.reply_text("Settings")
-
 def profile(update: Update, context: CallbackContext):
     update.message.reply_text("Your profile")
 
@@ -77,9 +74,9 @@ def gifts(update: Update, context: CallbackContext):
     for category in category_objs:
         category_name = category.name if LANG == 'en' else category.ru_name
         callback_data = {
-            'next': 'subcategory',
+            'n': 2,
             'id': category.id,
-            'back': False
+            'b': False
         }
         keyboard.append([InlineKeyboardButton(category_name, callback_data=str(callback_data))])
     context.bot.send_message(
@@ -90,9 +87,12 @@ def gifts(update: Update, context: CallbackContext):
 
 
 def subcategory(update: Update, context: CallbackContext):
+    data = eval(update.callback_query.data)
+    if data['b']:
+        data['id'] = Offer.objects.get(id=data['id']).category.id
     offers = Offer.objects.filter(
         margin__gte=15,
-        category__id=eval(update.callback_query.data)['id']
+        category__id=data['id']
     ).select_related('subcategory')
     sub_cat_ids = set(offers.values_list('subcategory__id', flat=True))
     sub_category_objs = Subcategory.objects.filter(id__in=sub_cat_ids)
@@ -101,15 +101,15 @@ def subcategory(update: Update, context: CallbackContext):
     for sub_category in sub_category_objs:
         sub_category_name = sub_category.name if LANG == 'en' else sub_category.ru_name
         callback_data = {
-            'next': 'offers',
+            'n': 0,
             'id': sub_category.id,
-            'back': False,
-            'back_to': 'gifts'
+            'b': False,
+            't': 1
         }
         keyboard.append(
             [InlineKeyboardButton(sub_category_name, callback_data=str(callback_data))]
         )
-    callback_data['back'] = True
+    callback_data['b'] = True
     keyboard.append([
         InlineKeyboardButton(
             subcategory_msg['back'].get(LANG, 'en'),
@@ -135,18 +135,21 @@ def offers(update: Update, context: CallbackContext):
     keyboard = list()
     for offer in offers:
         callback_data = {
-            'next': 'offers',
+            'n': 0,
             'id': offer.id,
-            'back': False,
-            'back_to': 'subcategory'
+            'b': False,
+            't': 2
         }
-        keyboard.append(
-            [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
-        )
-    callback_data['back'] = True
+        if len(str(callback_data).encode('utf-8')) < 65:
+            keyboard.append(
+                [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
+            )
+        else:
+            print(f"Can't parse inline keyboard button: b{len(str(callback_data).encode('utf-8'))}")
+    callback_data['b'] = True
     keyboard.append([
         InlineKeyboardButton(
-            subcategory_msg['back'].get(LANG, 'en'),
+            offer_msg['back'].get(LANG, 'en'),
             callback_data=str(callback_data)
         )
     ])
@@ -154,7 +157,7 @@ def offers(update: Update, context: CallbackContext):
         chat_id=update.effective_chat.id,
         text='. '.join([
             subcategory_name,
-            subcategory_msg['msg'].get(LANG, 'en')
+            offer_msg['msg'].get(LANG, 'en')
         ]),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
@@ -203,10 +206,10 @@ msg_handler = {
 
 def optionsHandler(update: Update, context: CallbackContext):
     data = eval(update.callback_query.data)
-    if data['back']:
-        msg_handler[data['back_to']](update, context)
+    if data['b']:
+        msg_handler[operations[data['t']]](update, context)
     else:
-        msg_handler[data['next']](update, context)
+        msg_handler[operations[data['n']]](update, context)
 
 
 def messageHandler(update: Update, context: CallbackContext):
@@ -220,7 +223,7 @@ def messageHandler(update: Update, context: CallbackContext):
 
 def unknown_text(update: Update, context: CallbackContext):
     update.message.reply_text(
-        "Sorry I can't recognize you , you said '%s'" % update.message.text)
+        "Sorry I can't recognize your message: '%s'" % update.message.text)
 
 
 def unknown(update: Update, context: CallbackContext):
@@ -232,14 +235,12 @@ updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('description', description))
 updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('contact', contact))
-updater.dispatcher.add_handler(CommandHandler('settings', settings))
 updater.dispatcher.add_handler(CommandHandler('profile', profile))
 updater.dispatcher.add_handler(CommandHandler('gifts', gifts))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(optionsHandler))
 
 updater.dispatcher.add_handler(MessageHandler(Filters.text, messageHandler))
-updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown))
 updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown_text))
 
@@ -280,3 +281,12 @@ updater.start_polling()
 #             }
 #         }
 #     }
+
+
+
+callback_data = {
+    'n': 'o',
+    'id': 1234567893242342540,
+    'b': True,
+    't': 's'
+}

@@ -28,11 +28,21 @@ subcategory_msg = {
         'ru': 'Выберите подкатегорию Гифта'
     },
     'back': {
-        'en': 'Return back to categories',
-        'ru': 'Вернуться обратно к категориям'
+        'en': 'Back to categories',
+        'ru': 'Обратно к категориям'
     },
 }
 
+offer_msg = {
+    'msg': {
+        'en': 'Choose Gift',
+        'ru': 'Выберите Гифт'
+    },
+    'back': {
+        'en': 'Back to subcategories',
+        'ru': 'Обратно к подкатегориям'
+    },
+}
 
 help_msg = {
     'en': '',
@@ -63,10 +73,6 @@ btns = {
         'en': 'Profile',
         'ru': 'Профиль'
     },
-    'settings': {
-        'en': 'Settings',
-        'ru': 'Настройки'
-    },
     'help': {
         'en': 'Help',
         'ru': 'Помощь'
@@ -75,4 +81,10 @@ btns = {
         'en': 'Contact',
         'ru': 'Контакт'
     }
+}
+
+operations = {
+    0: 'offers',
+    1: 'gifts',
+    2: 'subcategory'
 }

@@ -91,11 +91,16 @@ class Offer(models.Model):
         max = self.offer_detail.fiat_amount_range_max
         res = f'{self.subcategory.name}'
         if predefined_amount != 'null':
-            res += f' between: {predefined_amount}'
-        if min != 'null':
-            res += f' min: {min}'
-        if max != 'null':
-            res += f' max: {max}'
+            if len(predefined_amount) > 1:
+                res += f" {', '.join(str(x) for x in predefined_amount)} {self.buy_cur}."
+            else:
+                res += f" {predefined_amount[0]} {self.buy_cur}"
+        else:
+            if min != 'null':
+                res += f' min: {min}'
+            if max != 'null':
+                res += f' | max: {max}.'
+        return res
 
 
 
