@@ -95,6 +95,12 @@ btns = {
     }
 }
 
+emoji = {
+    'en': '\U0001F1EC\U0001F1E7',
+    'ru': '\U0001F1F7\U0001F1FA',
+    'settings': '\u2699\uFE0F',
+}
+
 operations = {
     0: 'offers',
     1: 'category',

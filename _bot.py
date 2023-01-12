@@ -8,6 +8,8 @@ from telegram import (
     InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton,
     ReplyKeyboardMarkup
 )
+
+from currency_symbols import CurrencySymbols
 from telegram.ext.updater import Updater
 from telegram.update import Update
 from telegram.ext import CallbackQueryHandler
@@ -19,7 +21,7 @@ from config import TG_TOKEN
 from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg,
-    operations
+    operations, emoji
 )
 from data.models import Category, Subcategory, Offer, TgUser
 
@@ -28,7 +30,7 @@ dispatcher = updater.dispatcher
 LANG = 'en'
 
 
-def start(update: Update, context: CallbackContext):
+def start(update: Update, context: CallbackContext, *args):
     values = {
         'username': update.message.from_user.username,
         'first_name': update.message.from_user.first_name,
@@ -54,13 +56,17 @@ def description(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
+    cur = CurrencySymbols.get_symbol('USD')
+    print(cur)
     buttons = [
         [KeyboardButton(btns['gifts'][LANG])],
         [
             KeyboardButton(btns['profile'][LANG]),
-            KeyboardButton(btns['help'][LANG]),
-            KeyboardButton(btns['contact'][LANG])
+            KeyboardButton(emoji['settings']),
+            KeyboardButton(emoji['ru' if LANG == 'en' else 'en']),
+            KeyboardButton(cur, callback_data='currency'),
         ],
+
     ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -258,6 +264,10 @@ def update_lang(lang:str, update: Update, user=None):
     global LANG
     LANG = lang
 
+
+def toggle_lang():
+    pass
+
 msg_handler = {
     '-- EN --': {
         'before': [
@@ -292,6 +302,11 @@ msg_handler = {
     'Контакт': contact,
     'Профиль': profile,
     'Гифты': gifts,
+
+    # emoji
+    '\U0001F1EC\U0001F1E7': toggle_lang,
+    '\U0001F1F7\U0001F1FA': toggle_lang,
+    '\u2699\uFE0F': help,
 }
 
 
@@ -306,6 +321,7 @@ def optionsHandler(update: Update, context: CallbackContext):
 
 def messageHandler(update: Update, context: CallbackContext):
     user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    # print(type(update.message.text), update.message.text, emoji[update.message.text])
     if type(msg_handler[update.message.text]) == dict:
         for foo in msg_handler[update.message.text]['before']:
             foo['func'](*foo['args'], update, user)
