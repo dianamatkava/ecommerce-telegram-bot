@@ -126,6 +126,6 @@ class TgUser(models.Model):
     first_name = models.CharField(max_length=255)
     native_language_code = models.CharField(max_length=2)
     language_code = models.CharField(max_length=2, null=True)
-    currency = models.CharField(max_length=3)
+    currency = models.CharField(max_length=3, null=True)
     is_bot = models.BooleanField()
     is_admin = models.BooleanField(default=False)

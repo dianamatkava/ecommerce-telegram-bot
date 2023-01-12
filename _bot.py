@@ -17,7 +17,7 @@ from telegram.ext.messagehandler import MessageHandler
 from telegram.ext.filters import Filters
 from config import TG_TOKEN
 from bot_txt_conf import (
-    lang, lang_txt, description_txt, btns,
+    currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg,
     operations
 )
@@ -38,6 +38,8 @@ def start(update: Update, context: CallbackContext):
     user, created = TgUser.objects.update_or_create(
         tg_id=update.message.from_user.id, defaults=values
     )
+    user.currency = None
+    user.save()
     buttons = [
         [KeyboardButton('-- EN --'), KeyboardButton('-- RU --')],
     ]
@@ -86,28 +88,78 @@ def profile(update: Update, context: CallbackContext, user=None):
     update.message.reply_text("Your profile")
 
 
+def currency(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = update.message.from_user.language_code
+
+    offers = Offer.objects.filter(margin__gte=15)
+    currencies = list(set(offers.values_list('buy_cur', flat=True)))
+    keyboard = list()
+    callback_data = {
+        'n': 1,
+        'cur': '',
+        'b': False
+    }
+    for cur in currencies:
+        callback_data['cur'] = cur
+        keyboard.append([InlineKeyboardButton(cur, callback_data=str(callback_data))])
+    callback_data['cur'] = currency_msg['null']
+    keyboard.append([InlineKeyboardButton(currency_msg['all'][LANG], callback_data=str(callback_data))])
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=currency_msg['txt'].get(LANG, 'en'),
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
 def gifts(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
-    offers = Offer.objects.filter(margin__gte=15).select_related('category')
-    categories = set(offers.values_list('category__id', flat=True))
-    category_objs = Category.objects.filter(id__in=categories)
-    keyboard = list()
-    for category in category_objs:
-        category_name = category.name if LANG == 'en' else category.ru_name
-        callback_data = {
-            'n': 2,
-            'id': category.id,
-            'b': False
-        }
-        keyboard.append([InlineKeyboardButton(category_name, callback_data=str(callback_data))])
-    context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=category_msg.get(LANG, 'en'),
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    if not user.currency:
+        currency(update, context, user)
+    else:
+        category(update, context, user)
 
+
+def category(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+
+    callback_data = update.__getitem__('callback_query')
+    if callback_data:
+        data = eval(update.callback_query.data)
+        cur = data.get('cur', None)
+        if cur and cur != currency_msg['null']:
+            user.currency = cur
+            user.save()
+    offers = Offer.objects.filter(margin__gte=15).select_related('category')
+    if user.currency:
+        offers = offers.filter(buy_cur=user.currency)
+    if offers:
+        categories = set(offers.values_list('category__id', flat=True))
+        category_objs = Category.objects.filter(id__in=categories)
+        keyboard = list()
+        for category in category_objs:
+            category_name = category.name if LANG == 'en' else category.ru_name
+            callback_data = {
+                'n': 2,
+                'id': category.id,
+                'b': False
+            }
+            keyboard.append([InlineKeyboardButton(category_name, callback_data=str(callback_data))])
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=category_msg.get(LANG, 'en'),
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    else:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="No Gifts",
+        )
 
 def subcategory(update: Update, context: CallbackContext, user=None):
     if not user:
@@ -120,21 +172,24 @@ def subcategory(update: Update, context: CallbackContext, user=None):
         margin__gte=15,
         category__id=data['id']
     ).select_related('subcategory')
-    sub_cat_ids = set(offers.values_list('subcategory__id', flat=True))
-    sub_category_objs = Subcategory.objects.filter(id__in=sub_cat_ids)
-    category_name = sub_category_objs[0].category.name if LANG == 'en' else sub_category_objs[0].category.ru_name
-    keyboard = list()
-    for sub_category in sub_category_objs:
-        sub_category_name = sub_category.name if LANG == 'en' else sub_category.ru_name
-        callback_data = {
-            'n': 0,
-            'id': sub_category.id,
-            'b': False,
-            't': 1
-        }
-        keyboard.append(
-            [InlineKeyboardButton(sub_category_name, callback_data=str(callback_data))]
-        )
+    if user.currency:
+        offers = offers.filter(buy_cur=user.currency)
+    if offers:
+        sub_cat_ids = set(offers.values_list('subcategory__id', flat=True))
+        sub_category_objs = Subcategory.objects.filter(id__in=sub_cat_ids)
+        category_name = sub_category_objs[0].category.name if LANG == 'en' else sub_category_objs[0].category.ru_name
+        keyboard = list()
+        for sub_category in sub_category_objs:
+            sub_category_name = sub_category.name if LANG == 'en' else sub_category.ru_name
+            callback_data = {
+                'n': 0,
+                'id': sub_category.id,
+                'b': False,
+                't': 1
+            }
+            keyboard.append(
+                [InlineKeyboardButton(sub_category_name, callback_data=str(callback_data))]
+            )
     callback_data['b'] = True
     keyboard.append([
         InlineKeyboardButton(
@@ -160,21 +215,24 @@ def offers(update: Update, context: CallbackContext, user=None):
         margin__gte=15,
         subcategory__id=eval(update.callback_query.data)['id']
     )
-    subcategory_name = offers[0].subcategory.name if LANG == 'en' else offers[0].subcategory.ru_name
-    keyboard = list()
-    for offer in offers:
-        callback_data = {
-            'n': 0,
-            'id': offer.id,
-            'b': False,
-            't': 2
-        }
-        if len(str(callback_data).encode('utf-8')) < 65:
-            keyboard.append(
-                [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
-            )
-        else:
-            print(f"Can't parse inline keyboard button: b{len(str(callback_data).encode('utf-8'))}")
+    if user.currency:
+        offers = offers.filter(buy_cur=user.currency)
+    if offers:
+        subcategory_name = offers[0].subcategory.name if LANG == 'en' else offers[0].subcategory.ru_name
+        keyboard = list()
+        for offer in offers:
+            callback_data = {
+                'n': 0,
+                'id': offer.id,
+                'b': False,
+                't': 2
+            }
+            if len(str(callback_data).encode('utf-8')) < 65:
+                keyboard.append(
+                    [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
+                )
+            else:
+                print(f"Can't parse inline keyboard button: b{len(str(callback_data).encode('utf-8'))}")
     callback_data['b'] = True
     keyboard.append([
         InlineKeyboardButton(
@@ -224,8 +282,10 @@ msg_handler = {
     'Profile': profile,
     'Gifts': gifts,
     'gifts': gifts,
+    'category': category,
     'subcategory': subcategory,
     'offers': offers,
+    'currency': currency,
 
     # RU
     'Помощь': help,
@@ -272,6 +332,7 @@ updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('contact', contact))
 updater.dispatcher.add_handler(CommandHandler('profile', profile))
 updater.dispatcher.add_handler(CommandHandler('gifts', gifts))
+updater.dispatcher.add_handler(CommandHandler('currency', currency))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(optionsHandler))
 

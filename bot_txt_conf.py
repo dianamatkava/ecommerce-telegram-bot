@@ -17,6 +17,18 @@ description_txt = {
     '''
 }
 
+currency_msg = {
+    'all': {
+        'en': 'See all',
+        'ru': 'Посмотреть все'
+    },
+    'null': 'ALL',
+    'txt': {
+        'en': 'Choose Gifts currency you want to buy or tap on "See all". You can change currency in future in Settings.',
+        'ru': 'Выберите валюту подарков, которую хотите купить, или нажмите «Просмотреть все». Вы можете изменить валюту в будущем в настройках.'
+    }
+}
+
 category_msg = {
     'en': 'Choose Gift category',
     'ru': 'Выберите категорию Гифта'
@@ -85,6 +97,6 @@ btns = {
 
 operations = {
     0: 'offers',
-    1: 'gifts',
+    1: 'category',
     2: 'subcategory'
 }
