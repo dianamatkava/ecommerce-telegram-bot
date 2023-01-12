@@ -89,10 +89,11 @@ class Offer(models.Model):
         predefined_amount = self.offer_detail.predefined_amount
         min = self.offer_detail.fiat_amount_range_min
         max = self.offer_detail.fiat_amount_range_max
-        res = f'{self.subcategory.name}'
+        name = self.subcategory.name
+        res = f'{name}' if len(name) <= 20 else f"{name.replace('Gift Cart', '')}"
         if predefined_amount != 'null':
             if len(predefined_amount) > 1:
-                res += f" {', '.join(str(x) for x in predefined_amount)} {self.buy_cur}."
+                res += f" | {', '.join(str(x) for x in predefined_amount)} {self.buy_cur}."
             else:
                 res += f" {predefined_amount[0]} {self.buy_cur}"
         else:
@@ -100,8 +101,7 @@ class Offer(models.Model):
                 res += f' min: {min}'
             if max != 'null':
                 res += f' | max: {max}.'
-        return res
-
+        return res + str(self.margin)
 
 
 class OfferDetail(models.Model):
@@ -118,3 +118,14 @@ class OfferDetail(models.Model):
     percent_per_usd = models.FloatField()
     require_full_name_visibility = models.BooleanField()
     default_flow_type = models.CharField(max_length=255)
+
+
+class TgUser(models.Model):
+    tg_id = models.IntegerField()
+    username = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    native_language_code = models.CharField(max_length=2)
+    language_code = models.CharField(max_length=2, null=True)
+    currency = models.CharField(max_length=3)
+    is_bot = models.BooleanField()
+    is_admin = models.BooleanField(default=False)

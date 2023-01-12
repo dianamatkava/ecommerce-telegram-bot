@@ -21,26 +21,37 @@ from bot_txt_conf import (
     category_msg, subcategory_msg, offer_msg,
     operations
 )
-from data.models import Category, Subcategory, Offer
+from data.models import Category, Subcategory, Offer, TgUser
 
 updater = Updater(TG_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 LANG = 'en'
 
+
 def start(update: Update, context: CallbackContext):
-    global LANG
-    LANG = lang.get(update.message.from_user.language_code, 'en')
+    values = {
+        'username': update.message.from_user.username,
+        'first_name': update.message.from_user.first_name,
+        'native_language_code': update.message.from_user.language_code,
+        'is_bot': update.message.from_user.is_bot
+    }
+    user, created = TgUser.objects.update_or_create(
+        tg_id=update.message.from_user.id, defaults=values
+    )
     buttons = [
         [KeyboardButton('-- EN --'), KeyboardButton('-- RU --')],
     ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=lang_txt[LANG],
+        text=lang_txt.get(user.native_language_code, user.language_code),
         reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
     )
 
 
-def description(update: Update, context: CallbackContext):
+def description(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     buttons = [
         [KeyboardButton(btns['gifts'][LANG])],
         [
@@ -56,17 +67,29 @@ def description(update: Update, context: CallbackContext):
     )
 
 
-def help(update: Update, context: CallbackContext):
+def help(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     update.message.reply_text("This is Help center")
 
-def contact(update: Update, context: CallbackContext):
+def contact(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     update.message.reply_text("Wait for the support team response")
 
-def profile(update: Update, context: CallbackContext):
+def profile(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = update.message.from_user.language_code
     update.message.reply_text("Your profile")
 
 
-def gifts(update: Update, context: CallbackContext):
+def gifts(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     offers = Offer.objects.filter(margin__gte=15).select_related('category')
     categories = set(offers.values_list('category__id', flat=True))
     category_objs = Category.objects.filter(id__in=categories)
@@ -86,7 +109,10 @@ def gifts(update: Update, context: CallbackContext):
     )
 
 
-def subcategory(update: Update, context: CallbackContext):
+def subcategory(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     data = eval(update.callback_query.data)
     if data['b']:
         data['id'] = Offer.objects.get(id=data['id']).category.id
@@ -126,7 +152,10 @@ def subcategory(update: Update, context: CallbackContext):
     )
 
 
-def offers(update: Update, context: CallbackContext):
+def offers(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
     offers = Offer.objects.filter(
         margin__gte=15,
         subcategory__id=eval(update.callback_query.data)['id']
@@ -163,8 +192,11 @@ def offers(update: Update, context: CallbackContext):
     )
 
 
-def update_lang(lang:str):
-    # add update user lang info
+def update_lang(lang:str, update: Update, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    user.language_code = lang
+    user.save()
     global LANG
     LANG = lang
 
@@ -189,7 +221,6 @@ msg_handler = {
     },
     'Help': help,
     'Contact': contact,
-    'Settings': settings,
     'Profile': profile,
     'Gifts': gifts,
     'gifts': gifts,
@@ -199,34 +230,38 @@ msg_handler = {
     # RU
     'Помощь': help,
     'Контакт': contact,
-    'Настройки': settings,
     'Профиль': profile,
     'Гифты': gifts,
 }
 
+
 def optionsHandler(update: Update, context: CallbackContext):
+    user = TgUser.objects.get(tg_id=update.callback_query.message.chat.id)
     data = eval(update.callback_query.data)
     if data['b']:
-        msg_handler[operations[data['t']]](update, context)
+        msg_handler[operations[data['t']]](update, context, user)
     else:
-        msg_handler[operations[data['n']]](update, context)
+        msg_handler[operations[data['n']]](update, context, user)
 
 
 def messageHandler(update: Update, context: CallbackContext):
+    user = TgUser.objects.get(tg_id=update.message.from_user.id)
     if type(msg_handler[update.message.text]) == dict:
         for foo in msg_handler[update.message.text]['before']:
-            foo['func'](*foo['args'])
-        msg_handler[update.message.text]['after'](update, context)
+            foo['func'](*foo['args'], update, user)
+        msg_handler[update.message.text]['after'](update, context, user)
     else:
-        msg_handler[update.message.text](update, context)
+        msg_handler[update.message.text](update, context, user)
 
 
 def unknown_text(update: Update, context: CallbackContext):
+    LANG = update.message.from_user.language_code
     update.message.reply_text(
         "Sorry I can't recognize your message: '%s'" % update.message.text)
 
 
 def unknown(update: Update, context: CallbackContext):
+    LANG = update.message.from_user.language_code
     update.message.reply_text(
         "Sorry '%s' is not a valid command" % update.message.text)
 
@@ -249,44 +284,3 @@ updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown_text))
 
 updater.start_polling()
 
-
-# {
-#     'update_id': 517899704,
-#     'message': {
-#         'supergroup_chat_created': False,
-#         'new_chat_photo': [],
-#         'text': 'Gifts',
-#         'channel_chat_created': False,
-#         'date': 1673291843,
-#         'delete_chat_photo': False,
-#         'caption_entities': [],
-#         'message_id': 203,
-#         'chat': {
-#             'id': 357585845,
-#             'type': 'private',
-#             'username': 'gera_di',
-#             'first_name': 'Di'
-#         },
-#         'group_chat_created': False,
-#         'new_chat_members': [],
-#         'photo': [],
-#         'entities': [],
-#         'from': {
-#             'is_bot': False,
-#             'id': 357585845,
-#             'first_name': 'Di',
-#             'language_code': 'ru',
-#             'username':
-#                 'gera_di'
-#             }
-#         }
-#     }
-
-
-
-callback_data = {
-    'n': 'o',
-    'id': 1234567893242342540,
-    'b': True,
-    't': 's'
-}
