@@ -26,7 +26,11 @@ currency_msg = {
     'txt': {
         'en': 'Choose Gifts currency you want to buy or tap on "See all". You can change currency in future in Settings.',
         'ru': 'Выберите валюту подарков, которую хотите купить, или нажмите «Просмотреть все». Вы можете изменить валюту в будущем в настройках.'
-    }
+    },
+    'msg': {
+        'en': 'You chose %s as your currency',
+        'ru': 'Вы выбрали %s своей валютой'
+    },
 }
 
 category_msg = {

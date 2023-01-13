@@ -9,7 +9,6 @@ from telegram import (
     ReplyKeyboardMarkup
 )
 
-from currency_symbols import CurrencySymbols
 from telegram.ext.updater import Updater
 from telegram.update import Update
 from telegram.ext import CallbackQueryHandler
@@ -52,25 +51,23 @@ def start(update: Update, context: CallbackContext, *args):
     )
 
 
-def description(update: Update, context: CallbackContext, user=None):
+def description(update: Update, context: CallbackContext, user=None, msg=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
-    cur = CurrencySymbols.get_symbol('USD')
-    print(cur)
     buttons = [
         [KeyboardButton(btns['gifts'][LANG])],
         [
+            KeyboardButton(emoji[LANG]),
             KeyboardButton(btns['profile'][LANG]),
-            KeyboardButton(emoji['settings']),
-            KeyboardButton(emoji['ru' if LANG == 'en' else 'en']),
-            KeyboardButton(cur, callback_data='currency'),
+            KeyboardButton(btns['help'][LANG]),
         ],
-
     ]
+    if user.currency:
+        buttons[1].append(KeyboardButton(user.currency))
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=description_txt[LANG],
+        text=description_txt[LANG] if not msg else msg,
         reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
     )
 
@@ -97,7 +94,7 @@ def profile(update: Update, context: CallbackContext, user=None):
 def currency(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
-    LANG = update.message.from_user.language_code
+    LANG = user.language_code
 
     offers = Offer.objects.filter(margin__gte=15)
     currencies = list(set(offers.values_list('buy_cur', flat=True)))
@@ -122,7 +119,6 @@ def currency(update: Update, context: CallbackContext, user=None):
 def gifts(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
-    LANG = user.language_code
     if not user.currency:
         currency(update, context, user)
     else:
@@ -138,9 +134,11 @@ def category(update: Update, context: CallbackContext, user=None):
     if callback_data:
         data = eval(update.callback_query.data)
         cur = data.get('cur', None)
-        if cur and cur != currency_msg['null']:
-            user.currency = cur
-            user.save()
+        if cur:
+            if cur != currency_msg['null']:
+                user.currency = cur
+                user.save()
+            description(update, context, user, currency_msg['msg'][LANG] %cur)
     offers = Offer.objects.filter(margin__gte=15).select_related('category')
     if user.currency:
         offers = offers.filter(buy_cur=user.currency)
@@ -306,7 +304,6 @@ msg_handler = {
     # emoji
     '\U0001F1EC\U0001F1E7': toggle_lang,
     '\U0001F1F7\U0001F1FA': toggle_lang,
-    '\u2699\uFE0F': help,
 }
 
 
@@ -322,12 +319,18 @@ def optionsHandler(update: Update, context: CallbackContext):
 def messageHandler(update: Update, context: CallbackContext):
     user = TgUser.objects.get(tg_id=update.message.from_user.id)
     # print(type(update.message.text), update.message.text, emoji[update.message.text])
-    if type(msg_handler[update.message.text]) == dict:
-        for foo in msg_handler[update.message.text]['before']:
-            foo['func'](*foo['args'], update, user)
-        msg_handler[update.message.text]['after'](update, context, user)
+    if msg_handler.get(update.message.text, None):
+        if type(msg_handler[update.message.text]) == dict:
+            for foo in msg_handler[update.message.text]['before']:
+                foo['func'](*foo['args'], update, user)
+            msg_handler[update.message.text]['after'](update, context, user)
+        else:
+            msg_handler[update.message.text](update, context, user)
     else:
-        msg_handler[update.message.text](update, context, user)
+        offers = Offer.objects.all()
+        currencies = set(offers.values_list('buy_cur', flat=True))
+        if update.message.text in currencies:
+            currency(update, context, user)
 
 
 def unknown_text(update: Update, context: CallbackContext):
