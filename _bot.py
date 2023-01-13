@@ -58,7 +58,7 @@ def description(update: Update, context: CallbackContext, user=None, msg=None):
     buttons = [
         [KeyboardButton(btns['gifts'][LANG])],
         [
-            KeyboardButton(emoji[LANG]),
+            KeyboardButton(emoji['en' if LANG == 'ru' else 'ru']),
             KeyboardButton(btns['profile'][LANG]),
             KeyboardButton(btns['help'][LANG]),
         ],
@@ -302,8 +302,24 @@ msg_handler = {
     'Гифты': gifts,
 
     # emoji
-    '\U0001F1EC\U0001F1E7': toggle_lang,
-    '\U0001F1F7\U0001F1FA': toggle_lang,
+    '\U0001F1EC\U0001F1E7': {
+        'before': [
+            {
+                'func': update_lang,
+                'args': ['en']
+            }
+        ],
+        'after': description
+    },
+    '\U0001F1F7\U0001F1FA': {
+        'before': [
+            {
+                'func': update_lang,
+                'args': ['ru']
+            }
+        ],
+        'after': description
+    },
 }
 
 
