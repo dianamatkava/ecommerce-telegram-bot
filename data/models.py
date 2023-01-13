@@ -69,6 +69,7 @@ class Offer(models.Model):
         on_delete=models.PROTECT
     )
     payment_method_label = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
     username =  models.CharField(max_length=255)
     score = models.FloatField()
     last_seen = models.CharField('lastSeenString', max_length=255)

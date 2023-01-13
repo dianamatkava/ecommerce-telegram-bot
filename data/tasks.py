@@ -1,8 +1,10 @@
+import time
 import json
 import requests
 from .config import paxful_conf
 from .utils import generate_url, str_to_dict, merge_lang, str2bool
 from .models import Category, Tag, Subcategory, Offer, OfferDetail
+
 
 DOMAIN = paxful_conf['domain']
 HEADERS = paxful_conf['headers']
@@ -92,6 +94,31 @@ def updatePaxfullOffers():
 
 
 # updatePaxfullOffers()
+
+def updateOfferDescription():
+    offers = Offer.objects.all()
+    x = 0
+    while x != len(offers)-1:
+        res = requests.get(
+            f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
+        )
+        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
+        if res.status_code == 200:
+            x += 1
+            start = res.text.index('offerTerms')
+            end = res.text.index('noCoins"')
+            desc = str_to_dict('{"' + res.text[start:end][:-2]+'}')
+            offers[x].description = desc['offerTerms']
+            offers[x].save()
+            print(json.dumps(desc, indent=4), '\n')
+            time.sleep(1)
+        elif res.status_code in [404, 410]:
+            offers[x].delete()
+            x += 1
+        else:
+            time.sleep(15)
+
+updateOfferDescription()
 
 def updateTags():
     tag_conf = paxful_conf['tags']
