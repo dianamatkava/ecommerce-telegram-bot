@@ -20,7 +20,7 @@ from config import TG_TOKEN
 from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg,
-    operations, emoji
+    operations, emoji, unknown_msg, help_msg
 )
 from data.models import Category, Subcategory, Offer, TgUser
 
@@ -76,7 +76,7 @@ def help(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
-    update.message.reply_text("This is Help center")
+    update.message.reply_text(help_msg[LANG])
 
 def contact(update: Update, context: CallbackContext, user=None):
     if not user:
@@ -347,18 +347,15 @@ def messageHandler(update: Update, context: CallbackContext):
         currencies = set(offers.values_list('buy_cur', flat=True))
         if update.message.text in currencies:
             currency(update, context, user)
+        else:
+            unknown(update, context, user)
 
-
-def unknown_text(update: Update, context: CallbackContext):
-    LANG = update.message.from_user.language_code
-    update.message.reply_text(
-        "Sorry I can't recognize your message: '%s'" % update.message.text)
-
-
-def unknown(update: Update, context: CallbackContext):
-    LANG = update.message.from_user.language_code
-    update.message.reply_text(
-        "Sorry '%s' is not a valid command" % update.message.text)
+def unknown(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    update.message.reply_text(unknown_msg[LANG] % update.message.text)
+    description(update, context, user)
 
 
 updater.dispatcher.add_handler(CommandHandler('start', start))
@@ -373,9 +370,7 @@ updater.dispatcher.add_handler(CallbackQueryHandler(optionsHandler))
 
 updater.dispatcher.add_handler(MessageHandler(Filters.text, messageHandler))
 updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
-updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown_text))
-
-
+updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown))
 
 
 updater.start_polling()

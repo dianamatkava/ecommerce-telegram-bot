@@ -61,23 +61,29 @@ offer_msg = {
 }
 
 help_msg = {
-    'en': '',
-    'ru': ''
-}
-
-help_txt = {
     'en': '''
         List of commands:
-    /start
-    /description
-    ... to be continued
+        /start -- restart bot
+        /description -- what this bot can do
+        /help -- open help center
+        /profile -- open profile
+        /gifts -- list of gifts
+        /currency -- change currency
     ''',
     'ru': '''
         Список команд:
-    /start
-    /description
-    ... to be continued
+         /start -- перезапустить бота
+         /description -- что умеет этот бот?
+         /help -- открыть справочный центр
+         /profile -- открыть профиль
+         /gifts -- список подарков
+         /currency -- изменить валюту
     '''
+}
+
+unknown_msg = {
+    'en': "Sorry '%s' is not a valid command. Please run /help to see available commands",
+    'ru': "Извините, '%s' не является допустимой командой. Пожалуйста, напишите /help, чтобы увидеть доступные команды"
 }
 
 btns = {
