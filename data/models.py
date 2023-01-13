@@ -70,6 +70,8 @@ class Offer(models.Model):
     )
     payment_method_label = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    warranty = models.CharField(max_length=255, null=True, blank=True)
+    faq_link = models.CharField(max_length=255, null=True, blank=True)
     username =  models.CharField(max_length=255)
     score = models.FloatField()
     last_seen = models.CharField('lastSeenString', max_length=255)
@@ -103,6 +105,9 @@ class Offer(models.Model):
             if max != 'null':
                 res += f' | max: {max}.'
         return res + str(self.margin)
+
+    def display_desc(self):
+        pass
 
 
 class OfferDetail(models.Model):

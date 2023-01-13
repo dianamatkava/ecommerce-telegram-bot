@@ -17,6 +17,7 @@ def str_to_dict(data):
         .replace('false', "'false'")
         .replace('true', "'true'")
         .replace('\/', "/")
+        .replace('<br />', '')
     )
 
 

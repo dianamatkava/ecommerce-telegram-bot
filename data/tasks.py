@@ -95,6 +95,31 @@ def updatePaxfullOffers():
 
 # updatePaxfullOffers()
 
+def update_offer(offer, data):
+    # Update warranty data if exist
+    if 'Warranty period (usage time):' in data:
+        warranty_start = data.index('Warranty period (usage time)')
+        warranty_end = data[warranty_start::].index('\n')
+        warranty = data[warranty_start:warranty_start+warranty_end].split(':')[1].strip()
+        if warranty[0].isdigit():
+            offer.warranty = warranty
+
+    # Update readme link if exist
+    if 'Read more (FAQ):' in data:
+        faq_start = data.index('Read more (FAQ):')
+        faq_end = data[faq_start::].index('\n')
+        faq = data[faq_start:faq_start+faq_end].split(':')
+        faq = ':'.join(faq[1::]).strip()
+        if 'paxful' not in faq:
+            offers = Offer.objects.filter(
+                subcategory=offer.subcategory,
+                # faq_link__isnull=True
+            )
+            offers.update(faq_link=faq)
+    offer.description = data
+    return offer
+
+
 def updateOfferDescription():
     offers = Offer.objects.all()
     x = 0
@@ -104,15 +129,23 @@ def updateOfferDescription():
         )
         print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
         if res.status_code == 200:
-            x += 1
             start = res.text.index('offerTerms')
             end = res.text.index('noCoins"')
             desc = str_to_dict('{"' + res.text[start:end][:-2]+'}')
-            offers[x].description = desc['offerTerms']
-            offers[x].save()
-            print(json.dumps(desc, indent=4), '\n')
+            print(json.dumps(desc['offerTerms'], indent=4), '\n')
+            if desc['offerTerms'] != '':
+                try:
+                    offer = update_offer(offers[x], desc['offerTerms'])
+                    offer.save()
+                except Exception as _ex:
+                    print(_ex)
+            else:
+                offers[x].description = None
+                offers[x].save()
             time.sleep(1)
+            x += 1
         elif res.status_code in [404, 410]:
+            print(f'DELETE: {offers[x].px_id, offers[x].username}\nPage not Found')
             offers[x].delete()
             x += 1
         else:

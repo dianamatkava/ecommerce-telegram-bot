@@ -115,5 +115,7 @@ emoji = {
 operations = {
     0: 'offers',
     1: 'category',
-    2: 'subcategory'
+    2: 'subcategory',
+    3: 'offer_desc',
+    4: 'payment_method'
 }

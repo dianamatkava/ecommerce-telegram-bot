@@ -224,32 +224,57 @@ def offers(update: Update, context: CallbackContext, user=None):
     if offers:
         subcategory_name = offers[0].subcategory.name if LANG == 'en' else offers[0].subcategory.ru_name
         keyboard = list()
+        callback_data = {
+            'n': 3,
+            'id': '',
+            'b': False,
+            't': 2
+        }
         for offer in offers:
-            callback_data = {
-                'n': 0,
-                'id': offer.id,
-                'b': False,
-                't': 2
-            }
+            callback_data['id'] = offer.id
             if len(str(callback_data).encode('utf-8')) < 65:
                 keyboard.append(
                     [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
                 )
             else:
                 print(f"Can't parse inline keyboard button: b{len(str(callback_data).encode('utf-8'))}")
-    callback_data['b'] = True
-    keyboard.append([
-        InlineKeyboardButton(
-            offer_msg['back'].get(LANG, 'en'),
-            callback_data=str(callback_data)
+        callback_data['b'] = True
+        keyboard.append([
+            InlineKeyboardButton(
+                offer_msg['back'].get(LANG, 'en'),
+                callback_data=str(callback_data)
+            )
+        ])
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text='. '.join([
+                subcategory_name,
+                offer_msg['msg'].get(LANG, 'en')
+            ]),
+            reply_markup=InlineKeyboardMarkup(keyboard)
         )
-    ])
+
+
+def offer_desc(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
+    callback_data = {
+        'n': 4,
+        'id': offer.id,
+        'b': False,
+        't': 2
+    }
+    callback_data_continue = callback_data
+    callback_data_continue['n'] = 0
+    keyboard = [
+        [InlineKeyboardButton("Continue", callback_data=str(callback_data_continue))],
+        [InlineKeyboardButton("Back", callback_data=str(callback_data))]
+    ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text='. '.join([
-            subcategory_name,
-            offer_msg['msg'].get(LANG, 'en')
-        ]),
+        text=offer.description if offer.description else "No description",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -294,6 +319,8 @@ msg_handler = {
     'subcategory': subcategory,
     'offers': offers,
     'currency': currency,
+    'offer_desc': offer_desc,
+    'payment_method': '',
 
     # RU
     'Помощь': help,
