@@ -275,7 +275,13 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=offer_msg['desc'][LANG] % (offer.display_name(), '5 days', 'US only',offer_msg['warranty'][LANG], 'test link'),
+        text=offer_msg['desc'][LANG] % (
+            offer.display_name(), 
+            '5 days', 
+            'US only',
+            offer_msg['warranty'][LANG], 
+            offer_msg['faq'][LANG] % offer.faq_link if offer.faq_link else '' 
+        ),
         reply_markup=InlineKeyboardMarkup(keyboard), 
         parse_mode='HTML'
     )

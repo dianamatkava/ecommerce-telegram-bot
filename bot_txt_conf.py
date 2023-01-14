@@ -63,7 +63,7 @@ offer_msg = {
 1. Warranty period (usage time): <strong>%s</strong>
 2. Region restriction: <strong>%s only</strong>
 3. Denominations: <strong>%s</strong> 
-4. Read more (FAQ): %s 
+%s
 
 
 - - - - - - - - - TERMS OF USE - - - - - - - - -
@@ -82,11 +82,17 @@ offer_msg = {
 Our reputation is incredibly important to us and we appreciate every feedback!
         """,
         'ru': """
-*bold %s* 
-1. Гарантийный срок (время использования): %s
-2. Ограничение региона: %s
-3. Номиналы: %s
-4. Подробнее (FAQ): %s
+<strong>%s</strong>
+
+- - - - - ВАЖНАЯ ИНФОРМАЦИЯ - - - - -
+
+1. Гарантийный срок (время использования): <strong>%s</strong>
+2. Ограничение по региону: <strong>только %s</strong>
+3. Номиналы: <strong>%s</strong>
+%s
+
+
+- - - - - - - - - УСЛОВИЯ ЭКСПЛУАТАЦИИ - - - - - - - - -
 
 Мы проверяем каждую карту на правильный баланс и действительность перед отправкой. Иногда это может занять некоторое время. Пожалуйста, подождите терпеливо;
 Перед покупкой вы должны убедиться, что подарочные карты будут работать в вашей стране/на вашем аккаунте. Мы не несем ответственности за любые проблемы на вашей стороне;
@@ -100,6 +106,10 @@ Our reputation is incredibly important to us and we appreciate every feedback!
     'warranty': {
         'en': 'Redeem on your account (unlimited after redeeming)',
         'ru': 'Погасить на свой счет (неограниченно после погашения)'
+    },
+    'faq': {
+        'en': '4. Read more (FAQ): %s ',
+        'ru': '4. Подробнее (FAQ): %s'
     }
 }
 
