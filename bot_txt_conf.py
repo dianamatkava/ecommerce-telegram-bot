@@ -9,12 +9,8 @@ lang_txt = {
 }
 
 description_txt = {
-    'en': '''
-        Choose a Gifts from a wide assortment \nfor a good price with discount +10%
-    ''',
-    'ru': '''
-        Выбирайте Гифты из широкого ассортимента \nпо хорошей цене со скидкой +10%
-    '''
+    'en': 'Choose a Gifts from a wide assortment \nfor a good price with discount +10%',
+    'ru': 'Выбирайте Гифты из широкого ассортимента \nпо хорошей цене со скидкой +10%'
 }
 
 currency_msg = {
@@ -58,6 +54,53 @@ offer_msg = {
         'en': 'Back to subcategories',
         'ru': 'Обратно к подкатегориям'
     },
+    'desc': {
+        'en': """ 
+<strong>%s</strong>
+
+- - - - - IMPORTANT INFORMATION - - - - -
+
+1. Warranty period (usage time): <strong>%s</strong>
+2. Region restriction: <strong>%s only</strong>
+3. Denominations: <strong>%s</strong> 
+4. Read more (FAQ): %s 
+
+
+- - - - - - - - - TERMS OF USE - - - - - - - - -
+
+• We check each card for the correct balance and validity before sending. Sometimes it may take some time. Please wait patiently;
+
+• Before purchasing, you must make sure that the gift cards will work in your country/on your account. We are not responsible for any problems on your side;
+
+• If for any reason you are unable to use received gift cards, we will only be able to cancel the order after we sell them to someone else. In other cases, we have the right not to cancel it;
+
+• You must use your gift cards within the specified warranty period. We cannot guarantee that they will be valid for a longer time if you decide to store them.
+
+• We are looking for reliable partners for honest, long-term and mutually beneficial cooperation. Please contact us if you have any business suggestions/offers.
+
+
+Our reputation is incredibly important to us and we appreciate every feedback!
+        """,
+        'ru': """
+*bold %s* 
+1. Гарантийный срок (время использования): %s
+2. Ограничение региона: %s
+3. Номиналы: %s
+4. Подробнее (FAQ): %s
+
+Мы проверяем каждую карту на правильный баланс и действительность перед отправкой. Иногда это может занять некоторое время. Пожалуйста, подождите терпеливо;
+Перед покупкой вы должны убедиться, что подарочные карты будут работать в вашей стране/на вашем аккаунте. Мы не несем ответственности за любые проблемы на вашей стороне;
+Если по какой-либо причине вы не можете использовать полученные подарочные карты, мы сможем отменить заказ только после того, как продадим их кому-то другому. В остальных случаях мы имеем право не отменять его;
+Вы должны использовать подарочные карты в течение указанного гарантийного срока. Мы не можем гарантировать, что они будут действительны в течение более длительного времени, если вы решите их сохранить.
+Мы ищем надежных партнеров для честного, долгосрочного и взаимовыгодного сотрудничества. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо деловые предложения / предложения.
+
+Наша репутация невероятно важна для нас, и мы ценим каждый отзыв!
+        """
+    },
+    'warranty': {
+        'en': 'Redeem on your account (unlimited after redeeming)',
+        'ru': 'Погасить на свой счет (неограниченно после погашения)'
+    }
 }
 
 help_msg = {

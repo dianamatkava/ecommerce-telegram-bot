@@ -24,6 +24,7 @@ from bot_txt_conf import (
 )
 from data.models import Category, Subcategory, Offer, TgUser
 
+
 updater = Updater(TG_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 LANG = 'en'
@@ -274,8 +275,9 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     ]
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=offer.description if offer.description else "No description",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        text=offer_msg['desc'][LANG] % (offer.display_name(), '5 days', 'US only',offer_msg['warranty'][LANG], 'test link'),
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode='HTML'
     )
 
 
@@ -381,8 +383,21 @@ def unknown(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
-    update.message.reply_text(unknown_msg[LANG] % update.message.text)
-    description(update, context, user)
+    buttons = [
+        [KeyboardButton(btns['gifts'][LANG])],
+        [
+            KeyboardButton(emoji['en' if LANG == 'ru' else 'ru']),
+            KeyboardButton(btns['profile'][LANG]),
+            KeyboardButton(btns['help'][LANG]),
+        ],
+    ]
+    if user.currency:
+        buttons[1].append(KeyboardButton(user.currency))
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=unknown_msg[LANG] % update.message.text,
+        reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
+    )
 
 
 updater.dispatcher.add_handler(CommandHandler('start', start))

@@ -151,7 +151,7 @@ def updateOfferDescription():
         else:
             time.sleep(15)
 
-updateOfferDescription()
+# updateOfferDescription()
 
 def updateTags():
     tag_conf = paxful_conf['tags']
