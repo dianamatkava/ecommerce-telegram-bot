@@ -91,29 +91,37 @@ class Offer(models.Model):
         on_delete=models.CASCADE
     )
 
-    def __str__(self) -> str:
-        return f'{self.subcategory.name}'
-
-    def display_name(self):
+    def offer_info(self):
+        margin = self.margin
         predefined_amount = self.offer_detail.predefined_amount
         min = self.offer_detail.fiat_amount_range_min
         max = self.offer_detail.fiat_amount_range_max
-        name = self.subcategory.name
-        res = f'{name}' if len(name) <= 20 else f"{name.replace('Gift Cart', '')}"
+        return f'{margin} - {predefined_amount} - {min} - {max}'
+    
+    
+    def display_amount(self):
+        predefined_amount = self.offer_detail.predefined_amount
+        min = self.offer_detail.fiat_amount_range_min
+        max = self.offer_detail.fiat_amount_range_max
+        res = str()
         if predefined_amount != 'null':
             if len(predefined_amount) > 1:
-                res += f" | {', '.join(str(x) for x in predefined_amount)} {self.buy_cur}."
+                res += f" {', '.join(str(x) for x in predefined_amount)} {self.buy_cur}."
             else:
                 res += f" {predefined_amount[0]} {self.buy_cur}"
         else:
             if min != 'null':
                 res += f' min: {min}'
             if max != 'null':
-                res += f' | max: {max}.'
-        return res + str(self.margin)
+                res += f' | max: {max} {self.buy_cur}.'
+        return f'{res}'
 
-    def display_desc(self):
-        pass
+    def __str__(self) -> str:
+        name = self.subcategory.name
+        margin = round((self.margin-5)/2)
+        res = f'{name}' if len(name) <= 20 else f"{name.replace('Gift Cart', '')}"
+        res += self.display_amount()
+        return f'-{margin}% {res}'
 
 
 class OfferDetail(models.Model):

@@ -212,6 +212,27 @@ def subcategory(update: Update, context: CallbackContext, user=None):
     )
 
 
+def get_display_offers(offers: Offer):
+    display_offers = [offers[0]]
+    min = offers[0].offer_detail.fiat_amount_range_min
+    max = offers[0].offer_detail.fiat_amount_range_max
+    pr_amount = offers[0].offer_detail.predefined_amount \
+        if type(offers[0].offer_detail.predefined_amount) == list else []
+    for idx in range(1, len(offers)):
+        if offers[idx].offer_info() != offers[idx-1].offer_info():
+            if offers[idx].offer_detail.predefined_amount != 'null':
+                if set(offers[idx].offer_detail.predefined_amount) - set(pr_amount):
+                    pr_amount.extend(offers[idx].offer_detail.predefined_amount)
+                    display_offers.append(offers[idx])
+            elif offers[idx].offer_detail.fiat_amount_range_min < min:
+                min = offers[idx].offer_detail.fiat_amount_range_min
+                display_offers.append(offers[idx])
+            elif offers[idx].offer_detail.fiat_amount_range_max > max:
+                max = offers[idx].offer_detail.fiat_amount_range_max
+                display_offers.append(offers[idx])
+    return display_offers
+
+
 def offers(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
@@ -219,7 +240,7 @@ def offers(update: Update, context: CallbackContext, user=None):
     offers = Offer.objects.filter(
         margin__gte=15,
         subcategory__id=eval(update.callback_query.data)['id']
-    )
+    ).order_by('-margin').select_related('offer_detail')
     if user.currency:
         offers = offers.filter(buy_cur=user.currency)
     if offers:
@@ -231,11 +252,12 @@ def offers(update: Update, context: CallbackContext, user=None):
             'b': False,
             't': 2
         }
-        for offer in offers:
+        display_offers = get_display_offers(offers)
+        for offer in display_offers:
             callback_data['id'] = offer.id
             if len(str(callback_data).encode('utf-8')) < 65:
                 keyboard.append(
-                    [InlineKeyboardButton(offer.display_name(), callback_data=str(callback_data))]
+                    [InlineKeyboardButton(offer.__str__(), callback_data=str(callback_data))]
                 )
             else:
                 print(f"Can't parse inline keyboard button: b{len(str(callback_data).encode('utf-8'))}")
@@ -283,10 +305,10 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=offer_msg['desc'][LANG] % (
-            offer.display_name(), 
+            offer.__str__(), 
             warranty, 
             offer.currency.country,
-            warranty, 
+            offer.display_amount(), 
             offer_msg['faq'][LANG] % offer.subcategory.faq if offer.subcategory.faq else '' 
         ),
         reply_markup=InlineKeyboardMarkup(keyboard), 
