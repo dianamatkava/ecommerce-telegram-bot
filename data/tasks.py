@@ -10,10 +10,69 @@ DOMAIN = paxful_conf['domain']
 HEADERS = paxful_conf['headers']
 
 
+def update_offer(offer, data):
+    # Update warranty data if exist
+    if 'Warranty period (usage time):' in data:
+        warranty_start = data.index('Warranty period (usage time)')
+        warranty_end = data[warranty_start::].index('\n')
+        warranty = data[warranty_start:warranty_start+warranty_end].split(':')[1].strip()
+        if warranty[0].isdigit():
+            offer.warranty = warranty
+
+    # Update readme link if exist
+    if 'Read more (FAQ):' in data:
+        faq_start = data.index('Read more (FAQ)')
+        faq_end = data[faq_start::].index('\n')
+        faq = data[faq_start:faq_start+faq_end].split(':')
+        faq = ':'.join(faq[1::]).strip()
+        if 'paxful' not in faq:
+            subcategory = Subcategory.objects.get(id=offer.subcategory.id)
+            if not subcategory.faq:
+                subcategory.faq = faq
+                subcategory.save()
+    offer.description = data
+    return offer
+
+
+def updateOfferDescription(offers=None):
+    if not offers:
+        offers = Offer.objects.all()
+    x = 0
+    while x != len(offers)-1:
+        res = requests.get(
+            f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
+        )
+        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
+        if res.status_code == 200:
+            start = res.text.index('offerTerms')
+            end = res.text.index('noCoins"')
+            desc = str_to_dict('{"' + res.text[start:end][:-2]+'}')
+            if desc['offerTerms'] != '':
+                try:
+                    offer = update_offer(offers[x], desc['offerTerms'])
+                    offer.save()
+                except Exception as _ex:
+                    print(_ex)
+            else:
+                offers[x].description = None
+                offers[x].save()
+            time.sleep(1)
+            x += 1
+        elif res.status_code in [404, 410]:
+            print(f'DELETE: {offers[x].px_id, offers[x].username}\nPage not Found')
+            offers[x].delete()
+            x += 1
+        else:
+            time.sleep(15)
+
+# updateOfferDescription()
+
+
 def updatePaxfullOffers():
     sell_conf = paxful_conf['sell']
     cur = paxful_conf['crypto_currency_id']
     data = list()
+    offer_desc = list()
     for code, id in cur.items():
         sell_conf['params']['crypto_currency_id'] = id
         URL = generate_url(
@@ -23,8 +82,10 @@ def updatePaxfullOffers():
         if res.status_code == 200:
             data = str_to_dict(res.text)['data']
             default_category = Category.objects.get(name='Other')
+            offers = list()
             for offer in data:
                 if offer['pricePerUsd'] >= 1.1:
+                    offers.append(offer['idHashed'])
                     tags = list()
                     if offer['tags']:
                         ids = [tag['id'] for tag in offer['tags']]
@@ -62,6 +123,7 @@ def updatePaxfullOffers():
                         print(f'Created new obj of {offer_detail}')
                     else:
                         print(f'Updated new obj of {offer_detail}')
+                        
                     offer_values = {
                         'sell_cur': offer['cryptoCurrencyCode'],
                         'buy_cur': offer['fiatCurrencyCode'],
@@ -85,9 +147,15 @@ def updatePaxfullOffers():
                     )
                     offer.tags.set(tags)
                     if created:
+                        offer_desc.append(offer)
                         print(f'Created new obj of {offer}')
                     else:
                         print(f'Updated new obj of {offer}')
+            outdated_offers = Offer.objects.filter(sell_cur=code).exclude(px_id__in=offers)
+            outdated_offers.delete()
+            print(f'REMOVED {len(outdated_offers)} {len(Offer.objects.all())} outdated offers')
+            print('UPDATING ofer description')
+            updateOfferDescription(offer_desc)
 
         else:
             print(f'Error {res.status_code}: Data was not found for {code}')
@@ -96,61 +164,6 @@ def updatePaxfullOffers():
 
 # updatePaxfullOffers()
 
-def update_offer(offer, data):
-    # Update warranty data if exist
-    if 'Warranty period (usage time):' in data:
-        warranty_start = data.index('Warranty period (usage time)')
-        warranty_end = data[warranty_start::].index('\n')
-        warranty = data[warranty_start:warranty_start+warranty_end].split(':')[1].strip()
-        if warranty[0].isdigit():
-            offer.warranty = warranty
-
-    # Update readme link if exist
-    if 'Read more (FAQ):' in data:
-        faq_start = data.index('Read more (FAQ)')
-        faq_end = data[faq_start::].index('\n')
-        faq = data[faq_start:faq_start+faq_end].split(':')
-        faq = ':'.join(faq[1::]).strip()
-        if 'paxful' not in faq:
-            subcategory = Subcategory.objects.get(id=offer.subcategory.id)
-            if not subcategory.faq:
-                subcategory.faq = faq
-                subcategory.save()
-    offer.description = data
-    return offer
-
-
-def updateOfferDescription():
-    offers = Offer.objects.all()
-    x = 0
-    while x != len(offers)-1:
-        res = requests.get(
-            f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
-        )
-        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
-        if res.status_code == 200:
-            start = res.text.index('offerTerms')
-            end = res.text.index('noCoins"')
-            desc = str_to_dict('{"' + res.text[start:end][:-2]+'}')
-            if desc['offerTerms'] != '':
-                try:
-                    offer = update_offer(offers[x], desc['offerTerms'])
-                    offer.save()
-                except Exception as _ex:
-                    print(_ex)
-            else:
-                offers[x].description = None
-                offers[x].save()
-            time.sleep(1)
-            x += 1
-        elif res.status_code in [404, 410]:
-            print(f'DELETE: {offers[x].px_id, offers[x].username}\nPage not Found')
-            offers[x].delete()
-            x += 1
-        else:
-            time.sleep(15)
-
-updateOfferDescription()
 
 def updateTags():
     tag_conf = paxful_conf['tags']
