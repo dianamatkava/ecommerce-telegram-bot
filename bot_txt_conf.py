@@ -176,6 +176,14 @@ btns = {
     'contact': {
         'en': 'Contact',
         'ru': 'Контакт'
+    },
+    'back': {
+        'en': 'Back',
+        'ru': 'Назад'
+    },
+    'continue': {
+        'en': 'Continue',
+        'ru': 'Продолжить'
     }
 }
 

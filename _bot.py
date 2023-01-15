@@ -136,12 +136,11 @@ def category(update: Update, context: CallbackContext, user=None):
         data = eval(update.callback_query.data)
         cur = data.get('cur', None)
         if cur:
-            if cur != currency_msg['null']:
-                user.currency = cur
-                user.save()
+            user.currency = cur
+            user.save()
             description(update, context, user, currency_msg['msg'][LANG] %cur)
     offers = Offer.objects.filter(margin__gte=15).select_related('category')
-    if user.currency:
+    if user.currency !=  'ALL':
         offers = offers.filter(buy_cur=user.currency)
     if offers:
         categories = set(offers.values_list('category__id', flat=True))
@@ -177,7 +176,7 @@ def subcategory(update: Update, context: CallbackContext, user=None):
         margin__gte=15,
         category__id=data['id']
     ).select_related('subcategory')
-    if user.currency:
+    if user.currency != 'ALL':
         offers = offers.filter(buy_cur=user.currency)
     if offers:
         sub_cat_ids = set(offers.values_list('subcategory__id', flat=True))
@@ -241,7 +240,7 @@ def offers(update: Update, context: CallbackContext, user=None):
         margin__gte=15,
         subcategory__id=eval(update.callback_query.data)['id']
     ).order_by('-margin').select_related('offer_detail')
-    if user.currency:
+    if user.currency != 'ALL':
         offers = offers.filter(buy_cur=user.currency)
     if offers:
         subcategory_name = offers[0].subcategory.name if LANG == 'en' else offers[0].subcategory.ru_name
@@ -292,8 +291,8 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     callback_data_continue = callback_data
     callback_data_continue['n'] = 0
     keyboard = [
-        [InlineKeyboardButton("Continue", callback_data=str(callback_data_continue))],
-        [InlineKeyboardButton("Back", callback_data=str(callback_data))]
+        [InlineKeyboardButton(btns['continue'][LANG], callback_data=str(callback_data_continue))],
+        [InlineKeyboardButton(btns['back'][LANG], callback_data=str(callback_data))]
     ]
     
     warranty = offer_msg['warranty']['msg'][LANG]
@@ -301,7 +300,7 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
         warranty = offer.warranty.split(' ')
         if offer_msg['warranty']['time'].get(warranty[1], None):
             warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
-
+    
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=offer_msg['desc'][LANG] % (
@@ -398,7 +397,6 @@ def optionsHandler(update: Update, context: CallbackContext):
 
 def messageHandler(update: Update, context: CallbackContext):
     user = TgUser.objects.get(tg_id=update.message.from_user.id)
-    # print(type(update.message.text), update.message.text, emoji[update.message.text])
     if msg_handler.get(update.message.text, None):
         if type(msg_handler[update.message.text]) == dict:
             for foo in msg_handler[update.message.text]['before']:
@@ -408,11 +406,14 @@ def messageHandler(update: Update, context: CallbackContext):
             msg_handler[update.message.text](update, context, user)
     else:
         offers = Offer.objects.all()
-        currencies = set(offers.values_list('buy_cur', flat=True))
-        if update.message.text in currencies:
+        currencies = list(offers.values_list('buy_cur', flat=True))
+        currencies.append('ALL')
+
+        if update.message.text in set(currencies):
             currency(update, context, user)
         else:
             unknown(update, context, user)
+            
 
 def unknown(update: Update, context: CallbackContext, user=None):
     if not user:
