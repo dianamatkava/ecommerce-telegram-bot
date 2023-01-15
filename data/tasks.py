@@ -3,7 +3,7 @@ import json
 import requests
 from .config import paxful_conf
 from .utils import generate_url, str_to_dict, merge_lang, str2bool
-from .models import Category, Tag, Subcategory, Offer, OfferDetail
+from .models import Category, Tag, Subcategory, Offer, OfferDetail, CurrencyDetail
 
 
 DOMAIN = paxful_conf['domain']
@@ -65,6 +65,7 @@ def updatePaxfullOffers():
                     offer_values = {
                         'sell_cur': offer['cryptoCurrencyCode'],
                         'buy_cur': offer['fiatCurrencyCode'],
+                        'currency': CurrencyDetail.objects.filter(code=offer['fiatCurrencyCode']).first(),
                         'margin': offer['margin'],
                         'price_per_cur': offer['pricePerUsd'],
                         'require_verified_id': str2bool(offer['requireVerifiedId']),
@@ -111,12 +112,10 @@ def update_offer(offer, data):
         faq = data[faq_start:faq_start+faq_end].split(':')
         faq = ':'.join(faq[1::]).strip()
         if 'paxful' not in faq:
-            offers = Offer.objects.filter(
-                subcategory__id=offer.subcategory.id,
-                faq_link__isnull=True
-            ).update(faq_link=faq)
-            print(offers, offer.subcategory.id)
-            print(faq, '\n')
+            subcategory = Subcategory.objects.get(id=offer.subcategory.id)
+            if not subcategory.faq:
+                subcategory.faq = faq
+                subcategory.save()
     offer.description = data
     return offer
 
@@ -128,7 +127,7 @@ def updateOfferDescription():
         res = requests.get(
             f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
         )
-        # print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
+        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
         if res.status_code == 200:
             start = res.text.index('offerTerms')
             end = res.text.index('noCoins"')
@@ -151,7 +150,7 @@ def updateOfferDescription():
         else:
             time.sleep(15)
 
-# updateOfferDescription()
+updateOfferDescription()
 
 def updateTags():
     tag_conf = paxful_conf['tags']

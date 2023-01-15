@@ -29,6 +29,7 @@ class Subcategory(models.Model):
         db_column = 'category_id',
         on_delete=models.PROTECT
     )
+    faq = models.CharField(max_length=1000, blank=True, null=True)
     px_slug = models.CharField(max_length=255)
 
     def __str__(self) -> str:
@@ -54,6 +55,12 @@ class Offer(models.Model):
         'cryptoCurrencyCode', max_length=128, choices=CURRENCIES
     )
     buy_cur = models.CharField('fiatCurrencyCode', max_length=128)
+    currency = models.ForeignKey(
+        'CurrencyDetail',
+        db_column = 'currency_ditail_id',
+        on_delete=models.PROTECT,
+        null=True
+    )
     margin = models.FloatField()
     price_per_cur = models.FloatField('pricePerUsd')
     require_verified_id = models.BooleanField()
@@ -61,7 +68,7 @@ class Offer(models.Model):
     category = models.ForeignKey(
         'Category',
         db_column = 'category_id',
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
     )
     subcategory = models.ForeignKey(
         'Subcategory',
@@ -71,7 +78,6 @@ class Offer(models.Model):
     payment_method_label = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     warranty = models.CharField(max_length=255, null=True, blank=True)
-    faq_link = models.CharField(max_length=255, null=True, blank=True)
     username =  models.CharField(max_length=255)
     score = models.FloatField()
     last_seen = models.CharField('lastSeenString', max_length=255)
@@ -135,3 +141,8 @@ class TgUser(models.Model):
     currency = models.CharField(max_length=3, null=True)
     is_bot = models.BooleanField()
     is_admin = models.BooleanField(default=False)
+
+
+class CurrencyDetail(models.Model):
+    code = models.CharField(max_length=3, unique=True)
+    country = models.CharField(max_length=128, null=True)
