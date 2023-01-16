@@ -380,10 +380,26 @@ def amount(update: Update, context: CallbackContext, user=None):
         )
         
 
-def payments_method(update: Update, context: CallbackContext, user=None):
+def payments_method(update: Update, context: CallbackContext, user=None, order: GiftOrder=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    
+    if not order:
+        data = eval(update.callback_query.data)
+        offer = Offer.objects.get(id=data['id'])
+        order, created = GiftOrder.objects.update_or_create(
+            status='Open',
+            offer=offer,
+            discount=offer.get_discount(),
+            amount=data['a'],
+            user=user
+        )
+    
+    offer = order.offer
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text='Payments',
+        text=f'Payment for {offer.__str__()}. \nAmount {order.amount}\nTo be continued',
     )
 
 
@@ -521,7 +537,7 @@ def messageHandler(update: Update, context: CallbackContext):
                         int(order[1]) <= offer.offer_detail.fiat_amount_range_max:
                         user_order.amount = int(order[1])
                         user_order.save()
-                        payments_method(update, context, user)
+                        payments_method(update, context, user, user_order)
                     else:
                         # Invalid input amount
                         unknown(
