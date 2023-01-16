@@ -141,6 +141,33 @@ Our reputation is incredibly important to us and we appreciate every feedback!
     }
 }
 
+amount_msg = {
+    'choose_amount': {
+        'en': 'Choose Gift amount:',
+        'ru': 'Выберите сумму Гифта:'
+    },
+    'enter_amount': {
+        'en': 'Input your custom amount.\nNote that amount should be between: <strong>\n%s</strong> \nPlease enter Gift ID and amount separated by a colon\nExample: 123:50.\nYour Gift ID: <strong>%s</strong>',
+        'ru': 'Введите вашу сумму.\nОбратите внимание, что сумма должна быть между: \n%s \nПожалуйста введите ID Гифта и сумму через двоиточие\nПример: 123:50\nID вашего Гифта: <strong>%s</strong>'
+    }
+}
+
+order_msg = {
+    'offer_not_found': {
+        'en': 'Gift by this ID not found',
+        'ru': 'Нет Гифта по такому ID'
+    },
+    'no_active_orders': {
+        'en': 'No active orders found',
+        'ru': 'Активных заказов не найдено'
+    },
+    'invalid_amount': {
+        'en': '<strong>Invalid Gift amount.</strong> \nNote that amount should be between: <strong>\n%s</strong> \nPlease enter Gift ID and amount separated by a colon\nExample: 123:50.\nYour Gift ID: <strong>%s</strong>',
+        'ru': '<strong>Неверная сумма Гифта.</strong>\nПожалуйста введите ID Гифта и сумму через двоиточие\nПример: 123:50\nID вашего Гифта: <strong>%s</strong>'
+    }
+}
+
+
 help_msg = {
     'en': '''
         List of commands:
@@ -211,5 +238,6 @@ operations = {
     2: 'subcategory',
     3: 'offer_desc',
     4: 'payment_method',
-    5: 'terms_of_use'
+    5: 'terms_of_use',
+    6: 'amount'
 }

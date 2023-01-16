@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 class Category(models.Model):
@@ -98,7 +99,6 @@ class Offer(models.Model):
         max = self.offer_detail.fiat_amount_range_max
         return f'{margin} - {predefined_amount} - {min} - {max}'
     
-    
     def display_amount(self):
         predefined_amount = self.offer_detail.predefined_amount
         min = self.offer_detail.fiat_amount_range_min
@@ -116,9 +116,12 @@ class Offer(models.Model):
                 res += f' | max: {max} {self.buy_cur}.'
         return f'{res}'
 
+    def get_discount(self):
+        return round((self.margin-5)/2)
+
     def __str__(self) -> str:
         name = self.subcategory.name
-        margin = round((self.margin-5)/2)
+        margin = self.get_discount()
         res = f'{name}' if len(name) <= 20 else f"{name.replace('Gift Cart', '')}"
         res += self.display_amount()
         return f'-{margin}% {res}'
@@ -149,6 +152,38 @@ class TgUser(models.Model):
     currency = models.CharField(max_length=3, null=True)
     is_bot = models.BooleanField()
     is_admin = models.BooleanField(default=False)
+
+
+class GiftOrder(models.Model):
+    OPEN = 'Open'
+    PENDING = 'Pending'
+    PAYMENT_RECEIVED = 'Payment Received'
+    COMPLETE = 'Complete'
+    STATUS = [
+        (OPEN, 'open'),
+        (PENDING, 'pending'),
+        (PAYMENT_RECEIVED, 'peyment received'),
+        (COMPLETE, 'complete')
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    status = models.CharField(max_length=128, choices=STATUS)
+    offer = models.ForeignKey(
+        'Offer', 
+        db_column='offer_id',
+        on_delete=models.CASCADE
+    )
+    discount = models.FloatField()
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(
+        'TgUser', 
+        db_column='tg_user_id',
+        on_delete=models.CASCADE
+    )
+    
+    def __str__(self):
+        return f"{self.status} / {self.user.username} / {self.offer.subcategory.name}"
 
 
 class CurrencyDetail(models.Model):

@@ -19,10 +19,10 @@ from telegram.ext.filters import Filters
 from config import TG_TOKEN
 from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
-    category_msg, subcategory_msg, offer_msg,
-    operations, emoji, unknown_msg, help_msg
+    category_msg, subcategory_msg, offer_msg, amount_msg,
+    operations, emoji, unknown_msg, help_msg, order_msg
 )
-from data.models import Category, Subcategory, Offer, TgUser
+from data.models import Category, Subcategory, Offer, TgUser, GiftOrder
 
 
 updater = Updater(TG_TOKEN, use_context=True)
@@ -31,8 +31,10 @@ LANG = 'en'
 
 
 def start(update: Update, context: CallbackContext, *args):
+    print(update.message.from_user)
+    username = update.message.from_user if update.message.from_user else 'unknown'
     values = {
-        'username': update.message.from_user.username,
+        'username': username,
         'first_name': update.message.from_user.first_name,
         'native_language_code': update.message.from_user.language_code,
         'is_bot': update.message.from_user.is_bot
@@ -291,7 +293,7 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     back = callback_data.copy()
     back.update({'b': True, 't': 0, 'id': offer.subcategory.id})
     continue_ = callback_data.copy()
-    continue_.update({'n': 4})
+    continue_.update({'n': 6})
     keyboard = [
         [InlineKeyboardButton(btns['terms_of_use'][LANG], callback_data=str(callback_data))],
         [
@@ -319,6 +321,65 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
         parse_mode='HTML'
     )
 
+def amount(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
+    
+    # create Order instance
+    GiftOrder.objects.update_or_create(
+        status='Open',
+        offer=offer,
+        discount=offer.get_discount(),
+        amount=0,
+        user=user
+    )
+    
+    callback_data = {
+        'n': 4,
+        'id': offer.id,
+        'a': 0,
+        'b': False,
+        't': 0
+    }
+    back = callback_data.copy()
+    back.update({'id': offer.subcategory.id, 'b': True})
+    keyboard = list()
+    
+    if offer.offer_detail.predefined_amount != 'null':   
+        for amount in offer.offer_detail.predefined_amount:
+            callback_data['a'] = amount
+            keyboard.append(
+                [
+                    InlineKeyboardButton(str(amount) + ' ' + offer.buy_cur, 
+                    callback_data=str(callback_data))
+                ]
+            )
+        keyboard.append([
+            InlineKeyboardButton(btns['back'][LANG], 
+            callback_data=str(back))
+        ])
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=amount_msg['choose_amount'][LANG],
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML'
+            
+        )
+    else:
+        keyboard = [[
+            InlineKeyboardButton(btns['back'][LANG], 
+            callback_data=str(back))
+        ]]
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=amount_msg['enter_amount'][LANG] % (offer.display_amount(), offer.id),
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode='HTML'
+        )
+        
+
 def payments_method(update: Update, context: CallbackContext, user=None):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -332,7 +393,7 @@ def terms_of_use(update: Update, context: CallbackContext, user=None):
     LANG = user.language_code
     offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
     callback_back = {
-        'n': 4,
+        'n': 6,
         'id': offer.id,
         'b': True,
         't': 3
@@ -348,6 +409,7 @@ def terms_of_use(update: Update, context: CallbackContext, user=None):
             )
         ]
     ]
+    
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=offer_msg['terms_of_use'][LANG],
@@ -396,6 +458,7 @@ msg_handler = {
     'offer_desc': offer_desc,
     'payment_method': payments_method,
     'terms_of_use': terms_of_use,
+    'amount': amount,
 
     # RU
     'Помощь': help,
@@ -443,18 +506,49 @@ def messageHandler(update: Update, context: CallbackContext):
             msg_handler[update.message.text]['after'](update, context, user)
         else:
             msg_handler[update.message.text](update, context, user)
+    elif len(update.message.text.split(':')) == 2:
+        order = update.message.text.split(':')
+        if order[0].isdigit() and order[1].isdigit():
+            offer = Offer.objects.filter(id=order[0]).first()
+            if offer:
+                user_order = GiftOrder.objects.filter(
+                    user=user,
+                    offer=offer,
+                    status='Open'
+                ).order_by('-created_at').first()
+                if user_order:
+                    if int(order[1]) >= offer.offer_detail.fiat_amount_range_min and\
+                        int(order[1]) <= offer.offer_detail.fiat_amount_range_max:
+                        user_order.amount = int(order[1])
+                        user_order.save()
+                        payments_method(update, context, user)
+                    else:
+                        # Invalid input amount
+                        unknown(
+                            update, context, user, 
+                            order_msg['invalid_amount'][LANG] % (
+                                offer.display_amount(), offer.id
+                            )
+                        )
+                else:
+                    # No active order found
+                    unknown(update, context, user, order_msg['no_active_orders'][LANG])
+            else:
+                # Offer by this ID not found
+                unknown(update, context, user, order_msg['offer_not_found'][LANG])
     else:
         offers = Offer.objects.all()
         currencies = list(offers.values_list('buy_cur', flat=True))
         currencies.append('ALL')
-
+        print(update.message)
+        print('\n', update)
         if update.message.text in set(currencies):
             currency(update, context, user)
         else:
             unknown(update, context, user)
             
 
-def unknown(update: Update, context: CallbackContext, user=None):
+def unknown(update: Update, context: CallbackContext, user=None, msg=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
@@ -468,10 +562,14 @@ def unknown(update: Update, context: CallbackContext, user=None):
     ]
     if user.currency:
         buttons[1].append(KeyboardButton(user.currency))
+    text = unknown_msg[LANG] % update.message.text
+    if msg:
+        text = msg
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=unknown_msg[LANG] % update.message.text,
-        reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True)
+        text=text,
+        reply_markup=ReplyKeyboardMarkup(buttons, resize_keyboard=True),
+        parse_mode='HTML'
     )
 
 
