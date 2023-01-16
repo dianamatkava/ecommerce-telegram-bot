@@ -283,16 +283,21 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
     LANG = user.language_code
     offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
     callback_data = {
-        'n': 4,
+        'n': 5,
         'id': offer.id,
         'b': False,
-        't': 2
+        't': 3
     }
-    callback_data_continue = callback_data
-    callback_data_continue['n'] = 0
+    back = callback_data.copy()
+    back.update({'b': True, 't': 0, 'id': offer.subcategory.id})
+    continue_ = callback_data.copy()
+    continue_.update({'n': 4})
     keyboard = [
-        [InlineKeyboardButton(btns['continue'][LANG], callback_data=str(callback_data_continue))],
-        [InlineKeyboardButton(btns['back'][LANG], callback_data=str(callback_data))]
+        [InlineKeyboardButton(btns['terms_of_use'][LANG], callback_data=str(callback_data))],
+        [
+            InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
+            InlineKeyboardButton(btns['continue'][LANG], callback_data=str(continue_))
+        ]
     ]
     
     warranty = offer_msg['warranty']['msg'][LANG]
@@ -314,6 +319,42 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
         parse_mode='HTML'
     )
 
+def payments_method(update: Update, context: CallbackContext, user=None):
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text='Payments',
+    )
+
+
+def terms_of_use(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
+    callback_back = {
+        'n': 4,
+        'id': offer.id,
+        'b': True,
+        't': 3
+    }
+    callback_continue = callback_back.copy()
+    callback_continue['b'] = False
+    keyboard = [
+        [
+            InlineKeyboardButton(btns['back'][LANG], callback_data=str(callback_back)),
+            InlineKeyboardButton(
+                btns['continue'][LANG], 
+                callback_data=str(callback_continue)
+            )
+        ]
+    ]
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=offer_msg['terms_of_use'][LANG],
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode='HTML'
+    )
+    
 
 def update_lang(lang:str, update: Update, user=None):
     if not user:
@@ -323,9 +364,6 @@ def update_lang(lang:str, update: Update, user=None):
     global LANG
     LANG = lang
 
-
-def toggle_lang():
-    pass
 
 msg_handler = {
     '-- EN --': {
@@ -356,7 +394,8 @@ msg_handler = {
     'offers': offers,
     'currency': currency,
     'offer_desc': offer_desc,
-    'payment_method': '',
+    'payment_method': payments_method,
+    'terms_of_use': terms_of_use,
 
     # RU
     'Помощь': help,

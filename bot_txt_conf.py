@@ -65,7 +65,23 @@ offer_msg = {
 3. Denominations: <strong>%s</strong> 
 %s
 
+Our reputation is incredibly important to us and we appreciate every feedback!
+        """,
+        'ru': """
+<strong>%s</strong>
 
+- - - - - ВАЖНАЯ ИНФОРМАЦИЯ - - - - -
+
+1. Гарантийный срок (время использования): <strong>%s</strong>
+2. Ограничение по региону: <strong>только %s</strong>
+3. Номиналы: <strong>%s</strong>
+%s
+
+Наша репутация невероятно важна для нас, и мы ценим каждый отзыв!
+        """
+    },
+    'terms_of_use': {
+        'en': '''
 - - - - - - - - - TERMS OF USE - - - - - - - - -
 
 • We check each card for the correct balance and validity before sending. Sometimes it may take some time. Please wait patiently;
@@ -80,18 +96,9 @@ offer_msg = {
 
 
 Our reputation is incredibly important to us and we appreciate every feedback!
-        """,
-        'ru': """
-<strong>%s</strong>
-
-- - - - - ВАЖНАЯ ИНФОРМАЦИЯ - - - - -
-
-1. Гарантийный срок (время использования): <strong>%s</strong>
-2. Ограничение по региону: <strong>только %s</strong>
-3. Номиналы: <strong>%s</strong>
-%s
-
-
+        ''',
+        'ru': '''
+        
 - - - - - - - - - УСЛОВИЯ ЭКСПЛУАТАЦИИ - - - - - - - - -
 
 • Мы проверяем каждую карту на правильный баланс и действительность перед отправкой. Иногда это может занять некоторое время. Пожалуйста, подождите терпеливо;
@@ -104,8 +111,9 @@ Our reputation is incredibly important to us and we appreciate every feedback!
 
 • Мы ищем надежных партнеров для честного, долгосрочного и взаимовыгодного сотрудничества. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо деловые предложения / предложения.
 
+
 Наша репутация невероятно важна для нас, и мы ценим каждый отзыв!
-        """
+        '''
     },
     'warranty': {
         'msg': {
@@ -184,6 +192,10 @@ btns = {
     'continue': {
         'en': 'Continue',
         'ru': 'Продолжить'
+    },
+    'terms_of_use': {
+        'en': 'Terms of use',
+        'ru': 'Условия использования'
     }
 }
 
@@ -198,5 +210,6 @@ operations = {
     1: 'category',
     2: 'subcategory',
     3: 'offer_desc',
-    4: 'payment_method'
+    4: 'payment_method',
+    5: 'terms_of_use'
 }
