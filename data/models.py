@@ -171,10 +171,11 @@ class GiftOrder(models.Model):
     offer = models.ForeignKey(
         'Offer', 
         db_column='offer_id',
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True
     )
     discount = models.FloatField()
-    amount = models.IntegerField()
+    amount = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(
         'TgUser', 
@@ -189,3 +190,4 @@ class GiftOrder(models.Model):
 class CurrencyDetail(models.Model):
     code = models.CharField(max_length=3, unique=True)
     country = models.CharField(max_length=128, null=True)
+    

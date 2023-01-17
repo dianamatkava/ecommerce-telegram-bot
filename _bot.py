@@ -332,7 +332,6 @@ def amount(update: Update, context: CallbackContext, user=None):
         status='Open',
         offer=offer,
         discount=offer.get_discount(),
-        amount=0,
         user=user
     )
     
@@ -392,8 +391,8 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
             status='Open',
             offer=offer,
             discount=offer.get_discount(),
-            amount=data['a'],
-            user=user
+            user=user, 
+            defaults={'amount': data['a']}
         )
     
     offer = order.offer
@@ -556,8 +555,6 @@ def messageHandler(update: Update, context: CallbackContext):
         offers = Offer.objects.all()
         currencies = list(offers.values_list('buy_cur', flat=True))
         currencies.append('ALL')
-        print(update.message)
-        print('\n', update)
         if update.message.text in set(currencies):
             currency(update, context, user)
         else:
