@@ -7,6 +7,9 @@ class Category(models.Model):
     ru_name = models.CharField(max_length=255)
     px_slug = models.CharField(max_length=255)
 
+    class Meta:
+        verbose_name_plural = "categories"
+
     def __str__(self) -> str:
         return f'{self.name} / {self.ru_name}'
 
@@ -16,6 +19,7 @@ class Tag(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=1025)
     px_slug = models.CharField(max_length=255)
+    
 
     def __str__(self) -> str:
         return f'{self.name}'
@@ -33,6 +37,9 @@ class Subcategory(models.Model):
     faq = models.CharField(max_length=1000, blank=True, null=True)
     px_slug = models.CharField(max_length=255)
 
+    class Meta:
+        verbose_name_plural = "subcategories"
+        
     def __str__(self) -> str:
         return f'{self.name} / {self.ru_name}'
 
@@ -152,6 +159,9 @@ class TgUser(models.Model):
     currency = models.CharField(max_length=3, null=True)
     is_bot = models.BooleanField()
     is_admin = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.username
 
 
 class GiftOrder(models.Model):
@@ -190,4 +200,7 @@ class GiftOrder(models.Model):
 class CurrencyDetail(models.Model):
     code = models.CharField(max_length=3, unique=True)
     country = models.CharField(max_length=128, null=True)
+    
+    def __str__(self):
+        return f'{self.code} {self.country}'
     
