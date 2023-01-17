@@ -31,8 +31,7 @@ LANG = 'en'
 
 
 def start(update: Update, context: CallbackContext, *args):
-    print(update.message.from_user)
-    username = update.message.from_user if update.message.from_user else 'unknown'
+    username = getattr(update.message.from_user, 'username', 'unknown')
     values = {
         'username': username,
         'first_name': update.message.from_user.first_name,
