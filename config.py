@@ -4,3 +4,5 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TG_TOKEN = os.getenv('TG_TOKEN', None)
+BINANCE_API_KEY = os.getenv('BINANCE_API_KEY', None)
+BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY', None)
