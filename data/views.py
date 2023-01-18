@@ -4,5 +4,5 @@ from .tasks import updateCategories
 # Create your views here.
 
 def home(request):
-    updateCategories()
+    # updateCategories()
     return HttpResponse('')

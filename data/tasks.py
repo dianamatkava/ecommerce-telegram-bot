@@ -150,6 +150,7 @@ def updatePaxfullOffers():
                     if created:
                         offer_desc.append(offer)
                         print(f'Created new obj of {offer}')
+                        
             outdated_offers = Offer.objects.filter(sell_cur=code).exclude(px_id__in=offers)
             print(f'REMOVED {len(outdated_offers)} outdated offers')
             outdated_offers.delete()
@@ -158,7 +159,7 @@ def updatePaxfullOffers():
                 updateOfferDescription(offer_desc)
 
         else:
-            print(f'Error {res.status_code}: Data was not found for {code}')
+            print(f'Error {res.status_code}: Data was not found for {code}.')
             return res.status_code
 
 
