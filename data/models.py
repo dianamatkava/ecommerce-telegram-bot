@@ -163,6 +163,7 @@ class TgUser(models.Model):
     currency = models.CharField(max_length=3, null=True)
     is_bot = models.BooleanField()
     is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.username
@@ -176,7 +177,7 @@ class GiftOrder(models.Model):
     STATUS = [
         (OPEN, 'open'),
         (PENDING, 'pending'),
-        (PAYMENT_RECEIVED, 'peyment received'),
+        (PAYMENT_RECEIVED, 'payment received'),
         (COMPLETE, 'complete')
     ]
     
@@ -190,6 +191,7 @@ class GiftOrder(models.Model):
     )
     discount = models.FloatField()
     amount = models.IntegerField(default=0)
+    price = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(
         'TgUser', 
@@ -207,4 +209,23 @@ class CurrencyDetail(models.Model):
     
     def __str__(self):
         return f'{self.code} {self.country}'
+    
+    
+class PaymentMethod(models.Model):
+    name = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+
+class PaymentAddress(models.Model):
+    name = models.CharField(max_length=510)
+    address = models.CharField(max_length=255)
+    network = models.CharField(max_length=255)
+    method = models.ForeignKey(
+        'PaymentMethod',
+        db_column='payment_method_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    is_active = models.BooleanField(default=True)
     

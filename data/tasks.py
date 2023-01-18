@@ -1,9 +1,14 @@
 import time
-import json
 import requests
+from celery import shared_task
+from celery.utils.log import get_task_logger
 from .config import paxful_conf
 from .utils import generate_url, str_to_dict, merge_lang, str2bool
 from .models import Category, Tag, Subcategory, Offer, OfferDetail, CurrencyDetail
+
+
+
+logger = get_task_logger(__name__)
 
 
 DOMAIN = paxful_conf['domain']
@@ -34,6 +39,7 @@ def update_offer(offer, data):
     return offer
 
 
+@shared_task
 def updateOfferDescription(offers=None):
     print('UPDATING ofer description')
     if not offers:
@@ -67,9 +73,8 @@ def updateOfferDescription(offers=None):
             time.sleep(15)
     print('UPDATING ofer description END')
 
-# updateOfferDescription()
 
-
+@shared_task
 def updatePaxfullOffers():
     print('UPDATING Paxful Offers')
     sell_conf = paxful_conf['sell']
@@ -163,13 +168,12 @@ def updatePaxfullOffers():
             return res.status_code
 
 
-# updatePaxfullOffers()
-
-
+@shared_task(name='updateTags')
 def updateTags():
     tag_conf = paxful_conf['tags']
     URL = generate_url([DOMAIN, tag_conf['url']['dir']])
     res = requests.get(URL, headers=HEADERS)
+    logger.info('HEEEREE')
     if res.status_code == 200:
         data = str_to_dict(res.text)['data']
         for tag in data:
@@ -189,6 +193,41 @@ def updateTags():
         return 400, f'Error {res.status_code}: Data was not found by {URL}'
 
 
+def updateCategories():
+    cat_conf = paxful_conf['categories']
+    EN_CAT_URL = generate_url(
+        [DOMAIN, cat_conf['url']['lang']['en'], cat_conf['url']['dir']]
+    )
+    RU_CAT_URL = generate_url(
+        [DOMAIN, cat_conf['url']['lang']['ru'], cat_conf['url']['dir']]
+    )
+    res = requests.get(EN_CAT_URL, headers=HEADERS)
+    if res.status_code == 200:
+        en_data = str_to_dict(res.text)['data']
+        res = requests.get(RU_CAT_URL, headers=HEADERS)
+        if res.status_code == 200:
+            ru_data = str_to_dict(res.text)['data']
+            data = merge_lang(en=en_data, ru=ru_data, field='name')
+            for category in data:
+                values = {
+                    'name': category['category_name'],
+                    'ru_name': category['ru_name'],
+                    'px_slug': category['slug']
+                }
+                obj, created = Category.objects.update_or_create(
+                    px_id=category['id'], defaults=values
+                )
+                if created:
+                    print(f'Created new obj of {obj}')
+                else:
+                    print(f'Updated new obj of {obj}')
+        else:
+            return 400, f'Error {res.status_code}: Data was not found by {RU_CAT_URL}'
+    else:
+        return 400, f'Error {res.status_code}: Data was not found by {EN_CAT_URL}'
+    
+    
+@shared_task
 def updateSubCategories():
     s_cat_conf = paxful_conf['subcategory']
     EN_S_CAT_URL = generate_url(
@@ -229,43 +268,4 @@ def updateSubCategories():
             return 400, f'Error {res.status_code}: Data was not found by {RU_S_CAT_URL}'
     else:
         return 400, f'Error {res.status_code}: Data was not found by {EN_S_CAT_URL}'
-
-
-def updateCategories():
-    cat_conf = paxful_conf['categories']
-    EN_CAT_URL = generate_url(
-        [DOMAIN, cat_conf['url']['lang']['en'], cat_conf['url']['dir']]
-    )
-    RU_CAT_URL = generate_url(
-        [DOMAIN, cat_conf['url']['lang']['ru'], cat_conf['url']['dir']]
-    )
-    res = requests.get(EN_CAT_URL, headers=HEADERS)
-    if res.status_code == 200:
-        en_data = str_to_dict(res.text)['data']
-        res = requests.get(RU_CAT_URL, headers=HEADERS)
-        if res.status_code == 200:
-            ru_data = str_to_dict(res.text)['data']
-            data = merge_lang(en=en_data, ru=ru_data, field='name')
-            for category in data:
-                values = {
-                    'name': category['category_name'],
-                    'ru_name': category['ru_name'],
-                    'px_slug': category['slug']
-                }
-                obj, created = Category.objects.update_or_create(
-                    px_id=category['id'], defaults=values
-                )
-                if created:
-                    print(f'Created new obj of {obj}')
-                else:
-                    print(f'Updated new obj of {obj}')
-        else:
-            return 400, f'Error {res.status_code}: Data was not found by {RU_CAT_URL}'
-    else:
-        return 400, f'Error {res.status_code}: Data was not found by {EN_CAT_URL}'
     
-    
-    
-# Run once per week    
-# updateTags()
-# updateSubCategories()

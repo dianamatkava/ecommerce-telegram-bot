@@ -139,7 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Save Celery result to DB
 CELERY_RESULT_BACKEND = "django-db"
-CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_BROKER_URL = os.getenv("REDIS_HOST", "redis://localhost:6379")
 
 # to Schedule items in DB
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
