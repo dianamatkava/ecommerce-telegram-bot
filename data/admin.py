@@ -48,18 +48,19 @@ class OfferAdmin(admin.ModelAdmin):
             'fields': (
                 'username', 'score', 'user_timezone', 
                 'payment_method_label', 'description',
-                'warranty', 'offer_detail'
+                'warranty', 'offer_detail', 'created_at'
             ),
         }),
     )
     
     list_display = [
         'px_id', 'subcategory', 'sell_cur', 'buy_cur', 'margin',
-        'username', 'score', 'user_timezone',  'category', 
+        'username', 'score', 'user_timezone',  'category', 'created_at'
     ]
     list_filter = ['category', 'sell_cur', 'buy_cur', 'username']
     search_fields = ['subcategory', 'category', 'username']
     list_display_links = ['px_id', 'subcategory']    
+    readonly_fields = ('created_at', )
     
 
 
@@ -131,3 +132,24 @@ class CurrencyDetailAdmin(admin.ModelAdmin):
     list_display = ['code', 'country']
     search_fields = ['code', 'country']
     list_display_links = ['code', 'country']
+    
+    
+    
+ADMIN_ORDERING = (
+    ('data', (
+        'Offer', 'GiftOrder', 'OfferDetail', 
+        'Tag', 'Subcategory', 'Category', 
+        'CurrencyDetail', 'TgUser'
+    )),
+)
+
+# Creating a sort function
+def get_app_list(self, request):
+    app_dict = self._build_app_dict(request)
+    for app_name, object_list in ADMIN_ORDERING:
+        app = app_dict[app_name]
+        app['models'].sort(key=lambda x: object_list.index(x['object_name']))
+        yield app
+        
+        
+admin.AdminSite.get_app_list = get_app_list

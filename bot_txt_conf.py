@@ -138,6 +138,10 @@ Our reputation is incredibly important to us and we appreciate every feedback!
     'faq': {
         'en': '4. Read more (FAQ): %s ',
         'ru': '4. Подробнее (FAQ): %s'
+    },
+    'country': {
+        'en': 'Valid in the country whose official currency is %s ',
+        'ru': 'Действует в стране официальная валюта которой является %s'
     }
 }
 
@@ -148,7 +152,7 @@ amount_msg = {
     },
     'enter_amount': {
         'en': 'Input your custom amount.\nNote that amount should be between: <strong>\n%s</strong> \nPlease enter Gift ID and amount separated by a colon\nExample: 123:50.\nYour Gift ID: <strong>%s</strong>',
-        'ru': 'Введите вашу сумму.\nОбратите внимание, что сумма должна быть между: \n%s \nПожалуйста введите ID Гифта и сумму через двоиточие\nПример: 123:50\nID вашего Гифта: <strong>%s</strong>'
+        'ru': 'Введите вашу сумму.\nОбратите внимание, что сумма должна быть между: <strong>\n%s</strong> \nПожалуйста введите ID Гифта и сумму через двоиточие\nПример: 123:50\nID вашего Гифта: <strong>%s</strong>'
     }
 }
 

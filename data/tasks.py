@@ -35,6 +35,7 @@ def update_offer(offer, data):
 
 
 def updateOfferDescription(offers=None):
+    print('UPDATING ofer description')
     if not offers:
         offers = Offer.objects.all()
     x = 0
@@ -42,7 +43,7 @@ def updateOfferDescription(offers=None):
         res = requests.get(
             f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
         )
-        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].display_name()}\nStatus Code: {res.status_code}')
+        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].__str__()}\nStatus Code: {res.status_code}')
         if res.status_code == 200:
             start = res.text.index('offerTerms')
             end = res.text.index('noCoins"')
@@ -64,11 +65,13 @@ def updateOfferDescription(offers=None):
             x += 1
         else:
             time.sleep(15)
+    print('UPDATING ofer description END')
 
 # updateOfferDescription()
 
 
 def updatePaxfullOffers():
+    print('UPDATING Paxful Offers')
     sell_conf = paxful_conf['sell']
     cur = paxful_conf['crypto_currency_id']
     data = list()
@@ -121,8 +124,6 @@ def updatePaxfullOffers():
                     )
                     if created:
                         print(f'Created new obj of {offer_detail}')
-                    else:
-                        print(f'Updated new obj of {offer_detail}')
                         
                     offer_values = {
                         'sell_cur': offer['cryptoCurrencyCode'],
@@ -149,13 +150,12 @@ def updatePaxfullOffers():
                     if created:
                         offer_desc.append(offer)
                         print(f'Created new obj of {offer}')
-                    else:
-                        print(f'Updated new obj of {offer}')
             outdated_offers = Offer.objects.filter(sell_cur=code).exclude(px_id__in=offers)
+            print(f'REMOVED {len(outdated_offers)} outdated offers')
             outdated_offers.delete()
-            print(f'REMOVED {len(outdated_offers)} {len(Offer.objects.all())} outdated offers')
-            print('UPDATING ofer description')
-            updateOfferDescription(offer_desc)
+            print('UPDATING Paxful Offers END')
+            if offer_desc:
+                updateOfferDescription(offer_desc)
 
         else:
             print(f'Error {res.status_code}: Data was not found for {code}')
@@ -262,5 +262,9 @@ def updateCategories():
             return 400, f'Error {res.status_code}: Data was not found by {RU_CAT_URL}'
     else:
         return 400, f'Error {res.status_code}: Data was not found by {EN_CAT_URL}'
+    
+    
+    
+# Run once per week    
 # updateTags()
 # updateSubCategories()

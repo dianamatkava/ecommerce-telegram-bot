@@ -307,12 +307,14 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
         if offer_msg['warranty']['time'].get(warranty[1], None):
             warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
     
+    country = offer.currency.country if offer.currency.country \
+                else offer_msg['country'][LANG] % offer.currency.code
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=offer_msg['desc'][LANG] % (
             offer.__str__(), 
             warranty, 
-            offer.currency.country,
+            country,
             offer.display_amount(), 
             offer_msg['faq'][LANG] % offer.subcategory.faq if offer.subcategory.faq else '' 
         ),
