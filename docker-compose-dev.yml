@@ -33,6 +33,8 @@ services:
   # Celery
   redis:
     image: redis:alpine
+    ports:
+    - "6379:6379" 
 
   celery:
     build: .
@@ -47,7 +49,7 @@ services:
     
   celery-beat:
     build: .
-    command: celery -A paxfull_gifts worker -l info
+    command: celery -A paxfull_gifts beat -l info
     volumes:
       - .:/src
     env_file:
