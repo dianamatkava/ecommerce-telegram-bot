@@ -220,6 +220,7 @@ class PaymentMethod(models.Model):
     display_name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     api_key_conf = models.CharField(max_length=128, blank=True, null=True)
+    secret_key_conf = models.CharField(max_length=128, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     
     def __str__(self):

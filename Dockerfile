@@ -22,5 +22,10 @@ RUN pip install -r requirements.txt
 ENV TELEGRAM_TOKEN ${TELEGRAM_TOKEN}
 CMD python3 _bot.py
 
+
+# ENV BINANCE_API_KEY ${BINANCE_API_KEY}
+# ENV BINANCE_SECRET_KEY ${BINANCE_SECRET_KEY}
+# CMD python3 _binance/binance_webhook.py
+
 # copy project
 COPY . /src

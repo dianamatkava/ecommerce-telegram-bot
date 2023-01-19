@@ -201,6 +201,7 @@ Crypto Payments are fast and safe way to send crypto.
     },
     'complete': {
         'en': '''
+QRCODE of Payment address attached
 Payment address: <strong>%s</strong> 
 Order ID: <strong>%s</strong> 
 <strong>NOTE:</strong> Include order ID to a note or comment for a transaction 
@@ -213,6 +214,7 @@ Total price including discount would be
 <strong>%s</strong> <strong>%s</strong>        
         ''',
         'ru': '''
+Вы можете видеть QRCODE платежного адреса
 Платежный адрес: <strong>%s</strong>
 Идентификатор заказа: <strong>%s</strong>
 <strong>ПРИМЕЧАНИЕ.</strong> Включите идентификатор заказа в примечание или комментарий к транзакции.

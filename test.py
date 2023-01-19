@@ -44,7 +44,7 @@ from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TE
 #     # BINANCE_SECRET_KEY
 # )
 
-# manualy changing API URL to test API URL
+# manually changing API URL to test API URL
 # client.API_URL = 'https://testnet.binance.vision/api'
 
 # # Returns all currency and its amount in wallet if exist 
@@ -66,7 +66,7 @@ from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TE
 
 
 
-# # Binnce Websocket
+# # Binance Websocket
 
 # from binance import Client, ThreadedWebsocketManager
 
@@ -115,7 +115,7 @@ from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TE
 
 
 
-# # BinanceSocketManager. User Socker This watches for 3 different user events
+# # BinanceSocketManager. User Socket This watches for 3 different user events
 import asyncio
 
 from decimal import Decimal as D
@@ -131,7 +131,7 @@ class Portfolio:
 
     async def _user_account_listener(self):
         bsm = BinanceSocketManager(self._async_client)
-        async with bsm.user_socket() as us:
+        async with bsm.trade_socket(symbol='BTCUSDT') as us:
             while True:
                 msg = await us.recv()
                 print('_user_account_listener ', msg)
