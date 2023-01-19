@@ -215,7 +215,7 @@ class CurrencyDetail(models.Model):
         (FIAT, 'Fiat')
     ]
     code = models.CharField(max_length=10, unique=True)
-    country = models.CharField(max_length=128, null=True)
+    country = models.CharField(max_length=128, null=True, blank=True)
     type = models.CharField(max_length=50, choices=TYPE, default=FIAT)
     
     def __str__(self):

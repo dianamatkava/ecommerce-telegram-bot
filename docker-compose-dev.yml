@@ -38,7 +38,7 @@ services:
     volumes:
       - .:/src
     restart: always
-    command: python _binance/binance_webhook.py
+    command: python _binance_webhook.py
 
   # Celery
   redis:
