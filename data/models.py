@@ -181,7 +181,8 @@ class GiftOrder(models.Model):
         (COMPLETE, 'complete')
     ]
     
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    callback_id = models.AutoField(primary_key=True)
     status = models.CharField(max_length=128, choices=STATUS)
     offer = models.ForeignKey(
         'Offer', 
@@ -238,5 +239,8 @@ class PaymentAddress(models.Model):
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return self.name
+        res = self.name
+        if self.network:
+            res += f" Network: {self.network}"
+        return res
     

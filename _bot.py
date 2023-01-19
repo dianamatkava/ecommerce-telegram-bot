@@ -403,16 +403,19 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
         
     methods = PaymentMethod.objects.filter(is_active=True)
     callback_data = {
-        'n': 4,
-        'id': order.offer.id,
-        'b': False,
-        't': 0
+        'n': 7,
+        'id': order.callback_id,
     }
     keyboard = list()
     for method in methods:
+        callback_data.update({'t': method.id})
+        print(callback_data)
         keyboard.append([
             InlineKeyboardButton(str(method), callback_data=str(callback_data))
         ])
+        
+    callback_data.update({'b': True, 't': 0, 'id': order.offer.subcategory.id})
+    print(callback_data)
     keyboard.append([
         InlineKeyboardButton(btns['back'][LANG], 
         callback_data=str(callback_data))
@@ -427,6 +430,50 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
         parse_mode='HTML'
     )
             
+
+def payment_address(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    
+    addresses = PaymentAddress.objects.filter(
+        is_active=True,
+        method__id=eval(update.callback_query.data)['t']
+    )
+    order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
+    callback_data = {
+        'n': 8,
+        'id': order.offer.id,
+    }
+    keyboard = list()
+    if len(addresses) > 1:
+        for address in addresses:
+            keyboard.append([
+                InlineKeyboardButton(str(address), callback_data=str(callback_data))
+            ])
+        
+        callback_data.update({'b': True, 't': 0, 'id': order.offer.subcategory.id})
+        keyboard.append([
+            InlineKeyboardButton(btns['back'][LANG], 
+            callback_data=str(callback_data))
+        ])
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=payment_msg['address'][LANG],
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        
+        
+def complete_payment(update: Update, context: CallbackContext, user=None)
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    
+    
+    
+    
+    
+    
 
 def terms_of_use(update: Update, context: CallbackContext, user=None):
     if not user:
@@ -500,6 +547,8 @@ msg_handler = {
     'payment_method': payments_method,
     'terms_of_use': terms_of_use,
     'amount': amount,
+    'address': payment_address,
+    'complete': complete_payment,
 
     # RU
     'Помощь': help,
@@ -532,7 +581,7 @@ msg_handler = {
 def optionsHandler(update: Update, context: CallbackContext):
     user = TgUser.objects.get(tg_id=update.callback_query.message.chat.id)
     data = eval(update.callback_query.data)
-    if data['b']:
+    if data.get('b', None):
         msg_handler[operations[data['t']]](update, context, user)
     else:
         msg_handler[operations[data['n']]](update, context, user)

@@ -174,9 +174,31 @@ order_msg = {
 
 payment_msg = {
     'method': {
-        'en': 'Payment for <strong>%s</strong>\nChoosen amount <strong>%s</strong>\nTotal price including discount would be <strong>%s</strong> <strong>%s</strong>',
-        'ru': 'Оплата <strong>%s</strong>\nВыбранная сумма <strong>%s</strong>\nОбщая стоимость, включая скидку, составит <strong>%s</strong> <strong>%s</strong>'
-    }
+        'en': '''
+Payment for <strong>%s</strong>
+Choosen amount <strong>%s</strong>
+Total price including discount would be <strong>%s</strong> <strong>%s</strong>
+
+<strong>NOTE:</strong> paying with <strong>Crypto</strong> charges zero fees. 
+Crypto Payments are fast and safe way to send crypto.
+
+<strong>PayPal's</strong> payment processing rates range from <strong>1.9%% to 3.5%%</strong> of each transaction, plus a fixed fee ranging from <strong>5 cents to 49 cents</strong>. The exact amount you pay depends on which PayPal product you use
+''',
+        'ru': '''
+Оплата <strong>%s</strong>
+Выбранная сумма <strong>%s</strong>
+Общая цена, включая скидку, составит <strong>%s</strong> <strong>%s</strong>.
+
+<strong>ПРИМЕЧАНИЕ.</strong> при оплате с помощью <strong>Crypto</strong> комиссия не взимается.
+Криптоплатежи — это быстрый и безопасный способ отправки криптовалюты.
+
+Тарифы на обработку платежей <strong>PayPal</strong> варьируются от <strong>1,9%% до 3,5%%</strong> от каждой транзакции плюс фиксированная комиссия в размере от <strong>5 до 49 центов</strong>. Точная сумма, которую вы платите, зависит от того, какой продукт PayPal вы используете.
+        '''
+    },
+    'address': {
+        'en': 'Choose desirable address',
+        'ru': 'Выберите желаемый адрес'
+    },
 }
 
 
@@ -251,5 +273,7 @@ operations = {
     3: 'offer_desc',
     4: 'payment_method',
     5: 'terms_of_use',
-    6: 'amount'
+    6: 'amount',
+    7: 'address',
+    8: 'complete'
 }
