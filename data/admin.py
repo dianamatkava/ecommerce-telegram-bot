@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Category, Tag, Subcategory, Offer,
     OfferDetail, GiftOrder, TgUser, CurrencyDetail,
-    PaymentMethod, PaymentAddress
+    PaymentMethod, PaymentAddress, Payment
 )
 
 
@@ -130,7 +130,7 @@ class TgUserAdmin(admin.ModelAdmin):
 
 @admin.register(CurrencyDetail)
 class CurrencyDetailAdmin(admin.ModelAdmin):
-    list_display = ['code', 'country']
+    list_display = ['code', 'country', 'type']
     search_fields = ['code', 'country']
     list_display_links = ['code', 'country']
     
@@ -153,6 +153,17 @@ class PaymentMethodAdmin(admin.ModelAdmin):
     ]
     search_fields = ['name', 'display_name']
     list_display_links = ['name', 'display_name']
+    
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = [
+        'order', 'amount', 'currency', 'tg_user'
+    ]
+    search_fields = ['order', 'currency', 'tg_user']
+    list_display_links = ['order', 'amount', 'currency', 'tg_user']
+    list_filter = ['currency']
+    
     
     
 # TODO: Does not work with external admin panel

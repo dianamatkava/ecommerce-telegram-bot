@@ -487,6 +487,7 @@ def complete_payment(
         address = PaymentAddress.objects.get(id=eval(update.callback_query.data)['t'])
 
     order.status = 'Pending'
+    order.price = order.get_price()
     order.save()
     qr_code = qrcode.make(address.address)
     qr_code.save(f'static/data/img/{address.address}')
@@ -499,12 +500,13 @@ def complete_payment(
         text=payment_msg['complete'][LANG] % (
             address.address, order.id, 
             order.offer.__str__(), str(order.amount),
-            str(order.get_price()), order.offer.buy_cur
+            str(order.price), order.offer.buy_cur
         ),
         parse_mode = 'HTML'
     )
     
     
+
 def terms_of_use(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)

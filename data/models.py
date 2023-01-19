@@ -208,8 +208,15 @@ class GiftOrder(models.Model):
 
 
 class CurrencyDetail(models.Model):
-    code = models.CharField(max_length=3, unique=True)
+    CRYPTO = 'crypto'
+    FIAT = 'fiat'
+    TYPE = [
+        (CRYPTO, 'Crypto'),
+        (FIAT, 'Fiat')
+    ]
+    code = models.CharField(max_length=10, unique=True)
     country = models.CharField(max_length=128, null=True)
+    type = models.CharField(max_length=50, choices=TYPE, default=FIAT)
     
     def __str__(self):
         return f'{self.code} {self.country}'
@@ -244,4 +251,28 @@ class PaymentAddress(models.Model):
         if self.network:
             res += f" Network: {self.network}"
         return res
+    
+    
+class Payment(models.Model):
+    order = models.ForeignKey(
+        'GiftOrder',
+        db_column='payment_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    amount = models.PositiveIntegerField()
+    currency = models.ForeignKey(
+        'CurrencyDetail',
+        db_column='currency_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    tg_user = models.ForeignKey(
+        'TgUser',
+        db_column='tg_user_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    
+    
     

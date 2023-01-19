@@ -209,6 +209,8 @@ Order ID: <strong>%s</strong>
 Your order for <strong>%s</strong>
 is Pending. Feel free to change payment method or address any time.
 
+We will notify you as soon as the payment has been received and send you a gift code.
+
 Chosen amount <strong>%s</strong>
 Total price including discount would be 
 <strong>%s</strong> <strong>%s</strong>        
@@ -219,6 +221,8 @@ Total price including discount would be
 Идентификатор заказа: <strong>%s</strong>
 <strong>ПРИМЕЧАНИЕ.</strong> Включите идентификатор заказа в примечание или комментарий к транзакции.
 
+Мы сообщим вам, как только платеж будет получен, и вышлем вам подарочный код.
+
 Ваш заказ на <strong>%s</strong>
 находится в ожидании. Вы можете изменить способ оплаты или адрес в любое время.
 
@@ -227,6 +231,10 @@ Total price including discount would be
 <strong>%s</strong> <strong>%s</strong>.        
         '''
     }
+}
+
+profile_msg = {
+    
 }
 
 

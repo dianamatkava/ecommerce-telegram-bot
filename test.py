@@ -4,38 +4,37 @@ import websocket
 from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TEST_BINANCE_SECRET_KEY
 
 
-# url = 'https://api.binance.com/api/v3/userDataStream'
-# res = requests.post(url, headers={'X-MBX-APIKEY': TEST_BINANCE_SECRET_KEY})
-# print(res.json())
-# listen_key = res.json()['listenKey']
+url = 'https://api.binance.com/api/v3/userDataStream'
+res = requests.post(url, headers={'X-MBX-APIKEY': BINANCE_API_KEY})
+print(res.json())
+listen_key = res.json()['listenKey']
 
 
-# url = f"wss://stream.binance.com:9443/ws/{listen_key}"
+url = f"wss://stream.binance.com:9443/ws/{listen_key}"
 
-# def on_open(ws):
-#     print(f"Connected")
+def on_open(ws):
+    print(f"Connected")
 
-# def on_message(ws, message):
-#     print(f"Message: {message}")
+def on_message(ws, message):
+    print(f"Message: {message}")
 
-# def on_error(ws, error):
-#     print(f"Error: {error}")
+def on_error(ws, error):
+    print(f"Error: {error}")
 
-# def on_close(ws, close_status_code, close_msg):
-#     print(f"Close: {close_status_code} {close_msg}")
-
-
-# ws = websocket.WebSocketApp(url=url,
-#                             on_open=on_open,
-#                             on_message=on_message,
-#                             on_error=on_error,
-#                             on_close=on_close)
-# ws.run_forever(ping_interval=300)
+def on_close(ws, close_status_code, close_msg):
+    print(f"Close: {close_status_code} {close_msg}")
 
 
+ws = websocket.WebSocketApp(url=url,
+                            on_open=on_open,
+                            on_message=on_message,
+                            on_error=on_error,
+                            on_close=on_close)
+ws.run_forever(ping_interval=300)
 
-# # Get wallet info
 
+
+# # GET (only) wallet info
 # from binance.client import Client
 # client = Client(
 #     TEST_BINANCE_API_KEY, 
@@ -113,42 +112,5 @@ from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TE
 
 # twm.join()
 
-
-
-# # BinanceSocketManager. User Socket This watches for 3 different user events
-import asyncio
-
-from decimal import Decimal as D
-from binance import BinanceSocketManager
-from binance.client import AsyncClient
-
-class Portfolio:
-    def __init__(self, async_client: AsyncClient = None):
-        self._async_client = async_client
-
-    async def run(self, loop):
-        loop.create_task(self._user_account_listener())
-
-    async def _user_account_listener(self):
-        bsm = BinanceSocketManager(self._async_client)
-        async with bsm.trade_socket(symbol='BTCUSDT') as us:
-            while True:
-                msg = await us.recv()
-                print('_user_account_listener ', msg)
-
-
-async def main():
-    async_client = await AsyncClient().create(
-        api_key=BINANCE_API_KEY, 
-        api_secret=BINANCE_SECRET_KEY
-    )
-
-    portfolio = Portfolio(async_client)
-    loop.create_task(portfolio.run(loop))
-
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
 
 

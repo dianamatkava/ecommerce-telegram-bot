@@ -2,12 +2,7 @@
 # User Socket. 
 # This watches for 3 different user events
 
-import django
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'paxfull_gifts.settings'
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-django.setup()
-
 import asyncio
 from binance import BinanceSocketManager
 from binance.client import AsyncClient
@@ -16,8 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-BINANCE_API_KEY = os.getenv('BINANCE_API_KEY', None)
-BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY', None)
+BINANCE_API_KEY = ''
+BINANCE_SECRET_KEY = ''
 
 
 class BinancePayment:
