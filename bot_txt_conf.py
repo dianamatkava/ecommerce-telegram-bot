@@ -172,6 +172,14 @@ order_msg = {
 }
 
 
+payment_msg = {
+    'method': {
+        'en': 'Payment for <strong>%s</strong>\nChoosen amount <strong>%s</strong>\nTotal price including discount would be <strong>%s</strong> <strong>%s</strong>',
+        'ru': 'Оплата <strong>%s</strong>\nВыбранная сумма <strong>%s</strong>\nОбщая стоимость, включая скидку, составит <strong>%s</strong> <strong>%s</strong>'
+    }
+}
+
+
 help_msg = {
     'en': '''
         List of commands:

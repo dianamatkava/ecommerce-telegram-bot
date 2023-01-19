@@ -199,6 +199,9 @@ class GiftOrder(models.Model):
         on_delete=models.CASCADE
     )
     
+    def get_price(self) -> int:
+        return self.amount - (self.amount * self.discount / 100)
+    
     def __str__(self):
         return f"{self.status} / {self.user.username} / {self.offer.subcategory.name}"
 
@@ -215,6 +218,11 @@ class PaymentMethod(models.Model):
     name = models.CharField(max_length=255)
     display_name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    api_key_conf = models.CharField(max_length=128, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.display_name
 
 
 class PaymentAddress(models.Model):
@@ -228,4 +236,7 @@ class PaymentAddress(models.Model):
         null=True
     )
     is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.name
     

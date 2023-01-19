@@ -20,9 +20,14 @@ from config import TG_TOKEN
 from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg, amount_msg,
-    operations, emoji, unknown_msg, help_msg, order_msg
+    payment_msg, emoji, unknown_msg, help_msg, order_msg, 
+    operations
 )
-from data.models import Category, Subcategory, Offer, TgUser, GiftOrder
+from data.models import (
+    Category, Subcategory, Offer, 
+    TgUser, GiftOrder, PaymentAddress,
+    PaymentMethod
+)
 
 
 updater = Updater(TG_TOKEN, use_context=True)
@@ -395,13 +400,33 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
             user=user, 
             defaults={'amount': data['a']}
         )
-    
-    offer = order.offer
+        
+    methods = PaymentMethod.objects.filter(is_active=True)
+    callback_data = {
+        'n': 4,
+        'id': order.offer.id,
+        'b': False,
+        't': 0
+    }
+    keyboard = list()
+    for method in methods:
+        keyboard.append([
+            InlineKeyboardButton(str(method), callback_data=str(callback_data))
+        ])
+    keyboard.append([
+        InlineKeyboardButton(btns['back'][LANG], 
+        callback_data=str(callback_data))
+    ])
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f'Payment for {offer.__str__()}. \nAmount {order.amount}\nTo be continued',
+        text=payment_msg['method'][LANG] % (
+            order.offer.__str__(), str(order.amount),
+            str(order.get_price()), order.offer.buy_cur
+        ),
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='HTML'
     )
-
+            
 
 def terms_of_use(update: Update, context: CallbackContext, user=None):
     if not user:

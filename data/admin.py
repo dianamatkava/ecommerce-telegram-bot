@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Category, Tag, Subcategory, Offer,
-    OfferDetail, GiftOrder, TgUser, CurrencyDetail
+    OfferDetail, GiftOrder, TgUser, CurrencyDetail,
+    PaymentMethod, PaymentAddress
 )
 
 
@@ -134,14 +135,34 @@ class CurrencyDetailAdmin(admin.ModelAdmin):
     list_display_links = ['code', 'country']
     
     
+@admin.register(PaymentAddress)
+class PaymentAddressAdmin(admin.ModelAdmin):
+    list_display = [
+        'name', 'address', 'network',
+        'method', 'is_active'
+    ]
+    search_fields = ['name', 'address', 'network']
+    list_display_links = ['name', 'address']
     
-ADMIN_ORDERING = (
-    ('data', (
-        'Offer', 'GiftOrder', 'OfferDetail', 
-        'Tag', 'Subcategory', 'Category', 
-        'CurrencyDetail', 'TgUser'
-    )),
-)
+    
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(admin.ModelAdmin):
+    list_display = [
+        'name', 'display_name',
+        'description', 'api_key_conf', 'is_active'
+    ]
+    search_fields = ['name', 'display_name']
+    list_display_links = ['name', 'display_name']
+    
+    
+# TODO: Does not work with external admin panel
+# ADMIN_ORDERING = (
+#     ('data', (
+#         'Offer', 'GiftOrder', 'OfferDetail', 
+#         'Tag', 'Subcategory', 'Category', 
+#         'CurrencyDetail', 'TgUser'
+#     )),
+# )
 
 # # Creating a sort function
 # def get_app_list(self, request, res_ID=None):
