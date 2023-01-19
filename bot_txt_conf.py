@@ -199,6 +199,32 @@ Crypto Payments are fast and safe way to send crypto.
         'en': 'Choose desirable address',
         'ru': 'Выберите желаемый адрес'
     },
+    'complete': {
+        'en': '''
+Payment address: <strong>%s</strong> 
+Order ID: <strong>%s</strong> 
+<strong>NOTE:</strong> Include order ID to a note or comment for a transaction 
+
+Your order for <strong>%s</strong>
+is Pending. Feel free to change payment method or address any time.
+
+Chosen amount <strong>%s</strong>
+Total price including discount would be 
+<strong>%s</strong> <strong>%s</strong>        
+        ''',
+        'ru': '''
+Платежный адрес: <strong>%s</strong>
+Идентификатор заказа: <strong>%s</strong>
+<strong>ПРИМЕЧАНИЕ.</strong> Включите идентификатор заказа в примечание или комментарий к транзакции.
+
+Ваш заказ на <strong>%s</strong>
+находится в ожидании. Вы можете изменить способ оплаты или адрес в любое время.
+
+Выбранная сумма <strong>%s</strong>
+Общая цена, включая скидку, составит 
+<strong>%s</strong> <strong>%s</strong>.        
+        '''
+    }
 }
 
 

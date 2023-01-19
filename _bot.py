@@ -3,12 +3,11 @@ import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'paxfull_gifts.settings'
 django.setup()
 
-import json
+import qrcode
 from telegram import (
-    InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton,
-    ReplyKeyboardMarkup
+    InlineKeyboardButton, InlineKeyboardMarkup, 
+    KeyboardButton, ReplyKeyboardMarkup
 )
-
 from telegram.ext.updater import Updater
 from telegram.update import Update
 from telegram.ext import CallbackQueryHandler
@@ -28,7 +27,6 @@ from data.models import (
     TgUser, GiftOrder, PaymentAddress,
     PaymentMethod
 )
-
 
 updater = Updater(TG_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
@@ -443,11 +441,12 @@ def payment_address(update: Update, context: CallbackContext, user=None):
     order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
     callback_data = {
         'n': 8,
-        'id': order.offer.id,
+        'id': order.callback_id,
     }
     keyboard = list()
     if len(addresses) > 1:
         for address in addresses:
+            callback_data.update({'t': address.id})
             keyboard.append([
                 InlineKeyboardButton(str(address), callback_data=str(callback_data))
             ])
@@ -462,19 +461,50 @@ def payment_address(update: Update, context: CallbackContext, user=None):
             text=payment_msg['address'][LANG],
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+    else:
+        complete_payment(
+            update, context, user,
+            {
+                'order': order,
+                'address': addresses[0]
+            }
+        )
         
         
-def complete_payment(update: Update, context: CallbackContext, user=None)
+def complete_payment(
+    update: Update, context: CallbackContext, 
+    user=None, data:dict=None
+):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
     
-    
-    
-    
-    
-    
+    if data:
+        order = data['order']
+        address = data['address']
+    else:
+        order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
+        address = PaymentAddress.objects.get(id=eval(update.callback_query.data)['t'])
 
+    order.status = 'Pending'
+    order.save()
+    qr_code = qrcode.make(address.address)
+    qr_code.save(f'static/data/img/{address.address}')
+    context.bot.send_photo(
+        chat_id=update.effective_chat.id, 
+        photo=open(f'static/data/img/{address.address}', 'rb')
+    )
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=payment_msg['complete'][LANG] % (
+            address.address, order.id, 
+            order.offer.__str__(), str(order.amount),
+            str(order.get_price()), order.offer.buy_cur
+        ),
+        parse_mode = 'HTML'
+    )
+    
+    
 def terms_of_use(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
