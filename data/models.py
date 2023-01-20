@@ -254,6 +254,17 @@ class PaymentAddress(models.Model):
     
     
 class Payment(models.Model):
+    DEPOSIT = 'deposit'
+    WITHDRAW = 'withdraw'
+    TYPE = [
+        (DEPOSIT, 'Deposit'),
+        (WITHDRAW, 'Withdraw')
+    ]
+    bc_id = models.CharField(max_length=255, null=True)
+    TxID = models.CharField(max_length=255, null=True)
+    _type = models.CharField(max_length=255, choices=TYPE, default=DEPOSIT)
+    status = models.BooleanField(default=True, null=True)
+    insert_time = models.CharField(max_length=255)
     order = models.ForeignKey(
         'GiftOrder',
         db_column='payment_id',

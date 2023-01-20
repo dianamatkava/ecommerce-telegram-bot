@@ -1,61 +1,64 @@
-import json
-import requests
-import websocket
-from config import BINANCE_API_KEY, BINANCE_SECRET_KEY, TEST_BINANCE_API_KEY, TEST_BINANCE_SECRET_KEY
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-url = 'https://api.binance.com/api/v3/userDataStream'
-res = requests.post(url, headers={'X-MBX-APIKEY': BINANCE_API_KEY})
-print(res.json())
-listen_key = res.json()['listenKey']
+BINANCE_API_KEY = os.getenv('DI_BINANCE_API_KEY', None)
+BINANCE_SECRET_KEY = os.getenv('DI_BINANCE_SECRET_KEY', None)
+
+# url = 'https://api.binance.com/api/v3/userDataStream'
+# res = requests.post(url, headers={'X-MBX-APIKEY': BINANCE_API_KEY})
+# print(res.json())
+# listen_key = res.json()['listenKey']
 
 
-url = f"wss://stream.binance.com:9443/ws/{listen_key}"
+# url = f"wss://stream.binance.com:9443/ws/{listen_key}"
 
-def on_open(ws):
-    print(f"Connected")
+# def on_open(ws):
+#     print(f"Connected")
 
-def on_message(ws, message):
-    print(f"Message: {message}")
+# def on_message(ws, message):
+#     print(f"Message: {message}")
 
-def on_error(ws, error):
-    print(f"Error: {error}")
+# def on_error(ws, error):
+#     print(f"Error: {error}")
 
-def on_close(ws, close_status_code, close_msg):
-    print(f"Close: {close_status_code} {close_msg}")
-
-
-ws = websocket.WebSocketApp(url=url,
-                            on_open=on_open,
-                            on_message=on_message,
-                            on_error=on_error,
-                            on_close=on_close)
-ws.run_forever(ping_interval=300)
+# def on_close(ws, close_status_code, close_msg):
+#     print(f"Close: {close_status_code} {close_msg}")
 
 
+# ws = websocket.WebSocketApp(url=url,
+#                             on_open=on_open,
+#                             on_message=on_message,
+#                             on_error=on_error,
+#                             on_close=on_close)
+# ws.run_forever(ping_interval=300)
 
-# # GET (only) wallet info
-# from binance.client import Client
-# client = Client(
-#     TEST_BINANCE_API_KEY, 
-#     TEST_BINANCE_SECRET_KEY
-#     # BINANCE_API_KEY, 
-#     # BINANCE_SECRET_KEY
-# )
+
+
+# GET (only) wallet info
+from binance.client import Client
+client = Client(
+    BINANCE_API_KEY, 
+    BINANCE_SECRET_KEY
+)
 
 # manually changing API URL to test API URL
 # client.API_URL = 'https://testnet.binance.vision/api'
 
-# # Returns all currency and its amount in wallet if exist 
+# Returns all currency and its amount in wallet if exist 
 # print(client.get_account())
 
-# # Return amount of specified cur
+# Return amount of specified cur
 # print(client.get_asset_balance(asset='BTC'))
 
 
-# # Get deposit history
-# deposits = client.get_deposit_history()
-# btc_deposits = client.get_deposit_history(coin='BTC')
+# Get deposit history
+deposits = client.get_deposit_history(startTime='1674156572611', endTime='1674156572610')
+btc_deposits = client.get_deposit_history(coin='BTC')
+
+print(deposits)
 
 # # Get withdraws history
 # withdraws = client.get_withdraw_history()

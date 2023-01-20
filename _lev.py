@@ -12,34 +12,7 @@
 # # Withdraw
 # _user_account_listener  {'e': 'balanceUpdate', 'E': 1674157255424, 'a': 'BTC', 'd': '-0.00079580', 'T': 1674157255423}
 # _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674157255424, 'u': 1674157255423, 'B': [{'a': 'BTC', 'f': '0.00000420', 'l': '0.00000000'}]}
-
-
-
-# _user_account_listener  {'e': 'balanceUpdate', 'E': 1674223218523, 'a': 'BTC', 'd': '-0.00010000', 'T': 1674223218522}
-# _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674223218523, 'u': 1674223218522, 'B': [{'a': 'BTC', 'f': '0.00907162', 'l': '0.00000000'}]}
-
-# _user_account_listener  {'e': 'balanceUpdate', 'E': 1674223218798, 'a': 'ETH', 'd': '0.00135249', 'T': 1674223218798}
-# _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674223218798, 'u': 1674223218798, 'B': [{'a': 'ETH', 'f': '0.00138696', 'l': '0.00000000'}]}
-
-# _user_account_listener  {'e': 'balanceUpdate', 'E': 1674223486734, 'a': 'BTC', 'd': '-0.00075000', 'T': 1674223486734}
-# _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674223486734, 'u': 1674223486734, 'B': [{'a': 'BTC', 'f': '0.00832162', 'l': '0.00000000'}]}
-
-# _user_account_listener  {'e': 'balanceUpdate', 'E': 1674223487041, 'a': 'ETH', 'd': '0.01015280', 'T': 1674223487040}
-# _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674223487041, 'u': 1674223487040, 'B': [{'a': 'ETH', 'f': '0.01153976', 'l': '0.00000000'}]}
-
-# _user_account_listener  {'e': 'balanceUpdate', 'E': 1674223574659, 'a': 'ETH', 'd': '-0.01000000', 'T': 1674223574659}
-# _user_account_listener  {'e': 'outboundAccountPosition', 'E': 1674223574659, 'u': 1674223574659, 'B': [{'a': 'ETH', 'f': '0.00153976', 'l': '0.00000000'}]}
-
-
-# MM transaction ID 0xde50152178d2da11f7564ed98347bdf68a7858888034f3f618d20449f3fbc589
-# 0xde50152178d2da11f7564ed98347bdf68a7858888034f3f618d20449f3fbc589
-
-import django
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'paxfull_gifts.settings'
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-django.setup()
-
 import asyncio
 from binance import BinanceSocketManager
 from binance.client import AsyncClient
@@ -48,8 +21,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-BINANCE_API_KEY = os.getenv('BINANCE_API_KEY', None)
-BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY', None)
+BINANCE_API_KEY = os.getenv('DI_BINANCE_API_KEY', None)
+BINANCE_SECRET_KEY = os.getenv('DI_BINANCE_SECRET_KEY', None)
 
 
 class BinancePayment:
