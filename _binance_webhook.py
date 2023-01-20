@@ -44,12 +44,13 @@ import asyncio
 from binance import BinanceSocketManager
 from binance.client import AsyncClient
 from dotenv import load_dotenv
+from data.models import Payment, PaymentAddress
 
 load_dotenv()
 
 
-BINANCE_API_KEY = os.getenv('BINANCE_API_KEY', None)
-BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY', None)
+BINANCE_API_KEY = os.getenv('DI_BINANCE_API_KEY', None)
+BINANCE_SECRET_KEY = os.getenv('DI_BINANCE_SECRET_KEY', None)
 
 
 class BinancePayment:
@@ -65,7 +66,36 @@ class BinancePayment:
         async with bsm.user_socket() as us:
             while True:
                 msg = await us.recv()
-                print('_user_account_listener ', msg)
+                if msg['e'] == 'balanceUpdate':
+                    _type = 'Deposit' if float(msg['d']) > 0 else 'Withdraw'
+                    transaction = dict()
+                    if _type == 'Deposit':
+                        transaction = await self._async_client.get_deposit_history(
+                            startTime=msg['E'], coin=msg['a']
+                        )
+                    else:
+                        transaction = await self._async_client.get_withdraw_history(
+                            startTime=msg['E'], coin=msg['a']
+                        )
+                    
+                    for tr in transaction:
+                        address = PaymentAddress.objects.filter(
+                            address=tr['address']
+                        )
+                        payment, created = Payment.objects.update_or_create(
+                            bc_id=tr['id'],
+                            TxID=tr['txId'],
+                            defaults={
+                                '_type': _type,
+                                'status': bool(tr['status']),
+                                'insert_time': tr['insertTime'],
+                                'amount': tr['amount'],
+                                'address': address
+                            }
+                        )
+                        if created:
+                            print(f'CREATED new payment {payment}')
+                print(msg)
 
 
 async def main():

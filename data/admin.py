@@ -158,11 +158,11 @@ class PaymentMethodAdmin(admin.ModelAdmin):
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = [
-        'order', 'amount', 'currency', 'tg_user'
+        'order', 'amount', 'address', 'tg_user'
     ]
-    search_fields = ['order', 'currency', 'tg_user']
-    list_display_links = ['order', 'amount', 'currency', 'tg_user']
-    list_filter = ['currency']
+    search_fields = ['order', 'address', 'tg_user']
+    list_display_links = ['order', 'amount', 'address', 'tg_user']
+    list_filter = ['address']
     
     
     

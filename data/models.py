@@ -199,6 +199,7 @@ class GiftOrder(models.Model):
         db_column='tg_user_id',
         on_delete=models.CASCADE
     )
+    TxID = models.CharField(max_length=255, null=True, blank=True)
     
     def get_price(self) -> int:
         return self.amount - (self.amount * self.discount / 100)
@@ -262,19 +263,19 @@ class Payment(models.Model):
     ]
     bc_id = models.CharField(max_length=255, null=True)
     TxID = models.CharField(max_length=255, null=True)
+    amount = models.PositiveIntegerField()
+    address = models.ForeignKey(
+        'PaymentAddress',
+        db_column='payment_address_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     _type = models.CharField(max_length=255, choices=TYPE, default=DEPOSIT)
     status = models.BooleanField(default=True, null=True)
     insert_time = models.CharField(max_length=255)
     order = models.ForeignKey(
         'GiftOrder',
         db_column='payment_id',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    amount = models.PositiveIntegerField()
-    currency = models.ForeignKey(
-        'CurrencyDetail',
-        db_column='currency_id',
         on_delete=models.SET_NULL,
         null=True
     )

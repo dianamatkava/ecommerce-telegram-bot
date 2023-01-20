@@ -55,7 +55,7 @@ client = Client(
 
 
 # Get deposit history
-deposits = client.get_deposit_history(startTime='1674156572611', endTime='1674156572610')
+deposits = client.get_deposit_history(startTime='1674156572611')
 btc_deposits = client.get_deposit_history(coin='BTC')
 
 print(deposits)
