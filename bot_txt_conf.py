@@ -64,8 +64,6 @@ offer_msg = {
 2. Region restriction: <strong>%s only</strong>
 3. Denominations: <strong>%s</strong> 
 %s
-
-Our reputation is incredibly important to us and we appreciate every feedback!
         """,
         'ru': """
 <strong>%s</strong>
@@ -77,7 +75,6 @@ Our reputation is incredibly important to us and we appreciate every feedback!
 3. Номиналы: <strong>%s</strong>
 %s
 
-Наша репутация невероятно важна для нас, и мы ценим каждый отзыв!
         """
     },
     'terms_of_use': {
@@ -93,9 +90,6 @@ Our reputation is incredibly important to us and we appreciate every feedback!
 • You must use your gift cards within the specified warranty period. We cannot guarantee that they will be valid for a longer time if you decide to store them.
 
 • We are looking for reliable partners for honest, long-term and mutually beneficial cooperation. Please contact us if you have any business suggestions/offers.
-
-
-Our reputation is incredibly important to us and we appreciate every feedback!
         ''',
         'ru': '''
         
@@ -110,9 +104,6 @@ Our reputation is incredibly important to us and we appreciate every feedback!
 • Вы должны использовать подарочные карты в течение указанного гарантийного срока. Мы не можем гарантировать, что они будут действительны в течение более длительного времени, если вы решите их сохранить.
 
 • Мы ищем надежных партнеров для честного, долгосрочного и взаимовыгодного сотрудничества. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо деловые предложения / предложения.
-
-
-Наша репутация невероятно важна для нас, и мы ценим каждый отзыв!
         '''
     },
     'warranty': {
@@ -200,36 +191,72 @@ Crypto Payments are fast and safe way to send crypto.
         'ru': 'Выберите желаемый адрес'
     },
     'complete': {
-        'en': '''
-QRCODE of Payment address attached
-Payment address: <strong>%s</strong> 
-Order ID: <strong>%s</strong> 
-<strong>NOTE:</strong> Include order ID to a note or comment for a transaction 
+        'PayPal': {
+            'en': '''
+Billing address: <strong>%s</strong>
 
-Your order for <strong>%s</strong>
-is Pending. Feel free to change payment method or address any time.
+<strong>NOTE.</strong> You need to attach sender address to your order
+To do this, go to <strong>"Profile" > "My Gifts" > "Pending"</strong>, select your order and specify your address
 
-We will notify you as soon as the payment has been received and send you a gift code.
+We will then notify you that the payment has been received and send you a gift code.
 
-Chosen amount <strong>%s</strong>
-Total price including discount would be 
-<strong>%s</strong> <strong>%s</strong>        
-        ''',
-        'ru': '''
-Вы можете видеть QRCODE платежного адреса
+<strong>%s</strong>
+Selected amount <strong>%s</strong>
+The total price, including discount, will be
+<strong>%s</strong> <strong>%s</strong>.
+            ''',
+            'ru': '''
 Платежный адрес: <strong>%s</strong>
-Идентификатор заказа: <strong>%s</strong>
-<strong>ПРИМЕЧАНИЕ.</strong> Включите идентификатор заказа в примечание или комментарий к транзакции.
 
-Мы сообщим вам, как только платеж будет получен, и вышлем вам подарочный код.
+<strong>ПРИМЕЧАНИЕ.</strong> К заказу необходимо добавить адрес отправителя.
+Для этого перейдите в раздел <strong>"Профиль" > "Мои подарки" > "В ожидании"</strong>, выберите свой заказ и укажите свой адрес.
 
-Ваш заказ на <strong>%s</strong>
-находится в ожидании. Вы можете изменить способ оплаты или адрес в любое время.
+Затем мы уведомим вас о получении платежа и отправим вам подарочный код.
 
+<strong>%s</strong>
 Выбранная сумма <strong>%s</strong>
-Общая цена, включая скидку, составит 
+Общая стоимость с учетом скидки составит
+<strong>%s</strong> <strong>%s</strong>.
+            '''  
+        },
+        'Crypto': {
+            'en': '''
+Billing address: <strong>%s</strong>
+Or use the <strong>QR-code</strong> above
+
+<strong>NOTE.</strong> After the transaction, you will receive <strong>TxID</strong> or <strong>transaction ID</strong>, which must be attached to the order.
+(<strong>TxID</strong> consists of Latin letters and numbers, for Binance only numbers)
+To do this, go to <strong>"Profile" > "My Gifts" > "Pending"</strong>, select your order and specify TxID
+
+We will then notify you that the payment has been received and send you a gift code.
+Also, by specifying <strong>TxID</strong>, we will send you a link where you can track your transaction
+
+<strong>%s</strong>
+Selected amount <strong>%s</strong>
+The total price, including discount, will be
+<strong>%s</strong> <strong>%s</strong>.   
+Price in <strong>%s</strong> at current rate <strong>%s</strong>
+(When paying, you can change the amount depending on the current exchange rate)
+            ''',
+            'ru': '''
+Платежный адрес: <strong>%s</strong>
+Или используйте <strong>QR-код</strong> выше
+
+<strong>ПРИМЕЧАНИЕ.</strong> После совершения транзакции вам будет доступен <strong>TxID</strong> или <strong>ID транзакции</strong>, который необходимо прикрепить к заказу.
+(<strong>TxID</strong> состоит из латинских букв и цифр, для Binance только цифры)
+Для этого перейдите в <strong>"Профиль" > "Мои Гифты" > "В ожидании"</strong>, выберете ваш заказ и укажите <strong>TxID</strong>
+
+После чего мы сообщим вам о получении платежа, и вышлем вам подарочный код.
+Так же, указав <strong>TxID</strong> мы вышлем вам ссылку, по которой вы сможете отслеживать свою транзакцию
+
+<strong>%s</strong>
+Выбранная сумма <strong>%s</strong>
+Общая фиатная цена, включая скидку, составит 
 <strong>%s</strong> <strong>%s</strong>.        
-        '''
+Цена в <strong>%s</strong> по текущему курсу <strong>%s</strong>
+(При оплате вы можете изменить сумму в зависимотсти от текущего курса)
+            '''
+        }
     }
 }
 

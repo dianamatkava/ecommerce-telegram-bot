@@ -1,5 +1,12 @@
+import os
 import uuid
+import requests
+from dotenv import load_dotenv
+from .utils import generate_url
 from django.db import models
+
+load_dotenv()
+
 
 class Category(models.Model):
     px_id = models.IntegerField()
@@ -201,8 +208,20 @@ class GiftOrder(models.Model):
     )
     TxID = models.CharField(max_length=255, null=True, blank=True)
     
-    def get_price(self) -> int:
+    def get_price(self):
         return self.amount - (self.amount * self.discount / 100)
+    
+    def to_crypto(self, coin):
+        URL = os.getenv('COINGATE_RATE_API', None)
+        headers = {"accept": "text/plain"}
+        response = requests.get(
+            generate_url([URL, self.offer.currency.code, coin]), 
+            headers=headers
+        )
+        if response.status_code == 200:
+            return round(float(response.text) * self.get_price(), 8)
+        else:
+            return response.status_code
     
     def __str__(self):
         return f"{self.status} / {self.user.username} / {self.offer.subcategory.name}"
@@ -238,7 +257,9 @@ class PaymentMethod(models.Model):
 class PaymentAddress(models.Model):
     name = models.CharField(max_length=510)
     address = models.CharField(max_length=255)
-    network = models.CharField(max_length=255)
+    network = models.CharField(
+        max_length=255, blank=True, null=True
+    )
     method = models.ForeignKey(
         'PaymentMethod',
         db_column='payment_method_id',

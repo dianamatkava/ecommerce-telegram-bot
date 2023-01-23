@@ -407,13 +407,11 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
     keyboard = list()
     for method in methods:
         callback_data.update({'t': method.id})
-        print(callback_data)
         keyboard.append([
             InlineKeyboardButton(str(method), callback_data=str(callback_data))
         ])
         
     callback_data.update({'b': True, 't': 0, 'id': order.offer.subcategory.id})
-    print(callback_data)
     keyboard.append([
         InlineKeyboardButton(btns['back'][LANG], 
         callback_data=str(callback_data))
@@ -489,21 +487,27 @@ def complete_payment(
     order.status = 'Pending'
     order.price = order.get_price()
     order.save()
-    qr_code = qrcode.make(address.address)
-    qr_code.save(f'static/data/img/{address.address}')
-    context.bot.send_photo(
-        chat_id=update.effective_chat.id, 
-        photo=open(f'static/data/img/{address.address}', 'rb')
-    )
+    
+    params = [
+        address.address, order.offer.__str__(), 
+        str(order.amount), str(order.price), 
+        order.offer.buy_cur
+    ]
+    if address.method.display_name == 'Crypto':
+        qr_code = qrcode.make(address.address)
+        qr_code.save(f'static/data/img/{address.address}')
+        context.bot.send_photo(
+            chat_id=update.effective_chat.id, 
+            photo=open(f'static/data/img/{address.address}', 'rb')
+        )
+        params.extend([address.name, order.to_crypto(address.name)])
+    
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=payment_msg['complete'][LANG] % (
-            address.address, order.id, 
-            order.offer.__str__(), str(order.amount),
-            str(order.price), order.offer.buy_cur
-        ),
+        text=payment_msg['complete'][address.method.display_name][LANG] % tuple(params),
         parse_mode = 'HTML'
     )
+   
     
     
 
