@@ -226,7 +226,8 @@ Or use the <strong>QR-code</strong> above
 
 <strong>NOTE.</strong> After the transaction, you will receive <strong>TxID</strong> or <strong>transaction ID</strong>, which must be attached to the order.
 (<strong>TxID</strong> consists of Latin letters and numbers, for Binance only numbers)
-To do this, go to <strong>"Profile" > "My Gifts" > "Pending"</strong>, select your order and specify TxID
+To do this, go to <strong>"Profile" > "'Pending' Gifts
+"</strong>, select your order and specify TxID
 
 We will then notify you that the payment has been received and send you a gift code.
 Also, by specifying <strong>TxID</strong>, we will send you a link where you can track your transaction
@@ -244,7 +245,7 @@ Price in <strong>%s</strong> at current rate <strong>%s</strong>
 
 <strong>ПРИМЕЧАНИЕ.</strong> После совершения транзакции вам будет доступен <strong>TxID</strong> или <strong>ID транзакции</strong>, который необходимо прикрепить к заказу.
 (<strong>TxID</strong> состоит из латинских букв и цифр, для Binance только цифры)
-Для этого перейдите в <strong>"Профиль" > "Мои Гифты" > "В ожидании"</strong>, выберете ваш заказ и укажите <strong>TxID</strong>
+Для этого перейдите в <strong>"Профиль" > "Гифты 'В ожидании'"</strong>, выберете ваш заказ и укажите <strong>TxID</strong>
 
 После чего мы сообщим вам о получении платежа, и вышлем вам подарочный код.
 Так же, указав <strong>TxID</strong> мы вышлем вам ссылку, по которой вы сможете отслеживать свою транзакцию
@@ -261,7 +262,28 @@ Price in <strong>%s</strong> at current rate <strong>%s</strong>
 }
 
 profile_msg = {
-    
+    'user_data': {
+        'en': '''
+<strong>%s</strong> 
+
+User ID: <strong>%s</strong>
+Language: <strong>%s</strong>
+Currency: <strong>%s</strong>
+
+Open Orders: <strong>%s</strong>
+Completed Orders: <strong>%s</strong>
+        ''',
+        'ru': '''
+<strong>%s</strong>
+
+Идентификатор пользователя: <strong>%s</strong>
+Язык: <strong>%s</strong>
+Валюта: <strong>%s</strong>
+
+Открытые Гифты: <strong>%s</strong>
+Полученые Гифты: <strong>%s</strong>
+        '''
+    }
 }
 
 
@@ -338,5 +360,6 @@ operations = {
     5: 'terms_of_use',
     6: 'amount',
     7: 'address',
-    8: 'complete'
+    8: 'complete',
+    9: 'user_gifts'
 }

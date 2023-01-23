@@ -177,20 +177,14 @@ class TgUser(models.Model):
 
 
 class GiftOrder(models.Model):
-    OPEN = 'Open'
-    PENDING = 'Pending'
-    PAYMENT_RECEIVED = 'Payment Received'
-    COMPLETE = 'Complete'
-    STATUS = [
-        (OPEN, 'open'),
-        (PENDING, 'pending'),
-        (PAYMENT_RECEIVED, 'payment received'),
-        (COMPLETE, 'complete')
-    ]
-    
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     callback_id = models.AutoField(primary_key=True)
-    status = models.CharField(max_length=128, choices=STATUS)
+    status = models.ForeignKey(
+        'PaymentStatus',
+        db_column='payment_status_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     offer = models.ForeignKey(
         'Offer', 
         db_column='offer_id',
@@ -308,4 +302,14 @@ class Payment(models.Model):
     )
     
     
+class PaymentStatus(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    ru_name = models.CharField(max_length=128)
+    description = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        verbose_name_plural = "payment statuses"
+    
+    def __str__(self):
+        return self.name
     

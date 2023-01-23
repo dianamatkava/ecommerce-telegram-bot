@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Category, Tag, Subcategory, Offer,
     OfferDetail, GiftOrder, TgUser, CurrencyDetail,
-    PaymentMethod, PaymentAddress, Payment
+    PaymentMethod, PaymentAddress, Payment, PaymentStatus
 )
 
 
@@ -163,6 +163,13 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ['order', 'address', 'tg_user']
     list_display_links = ['order', 'amount', 'address', 'tg_user']
     list_filter = ['address']
+    
+
+@admin.register(PaymentStatus)
+class PaymentStatusAdmin(admin.ModelAdmin):
+    list_display = ['name', 'ru_name', 'description']
+    search_fields = ['name', 'ru_name']
+    list_display_links = ['name', 'ru_name']
     
     
     

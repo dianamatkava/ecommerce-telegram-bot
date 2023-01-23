@@ -1,5 +1,6 @@
 import django
 import os
+from django.db.models import Count
 os.environ['DJANGO_SETTINGS_MODULE'] = 'paxfull_gifts.settings'
 django.setup()
 
@@ -20,13 +21,13 @@ from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg, amount_msg,
     payment_msg, emoji, unknown_msg, help_msg, order_msg, 
-    operations
+    operations, profile_msg
 )
 from data.models import (
     Category, Subcategory, Offer, 
     TgUser, GiftOrder, PaymentAddress,
-    PaymentMethod
-)
+    PaymentMethod, PaymentStatus
+    )
 
 updater = Updater(TG_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
@@ -89,11 +90,47 @@ def contact(update: Update, context: CallbackContext, user=None):
     LANG = user.language_code
     update.message.reply_text("Wait for the support team response")
 
+
 def profile(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = update.message.from_user.language_code
-    update.message.reply_text("Your profile")
+    
+    user_orders = GiftOrder.objects.filter(user=user)
+    keyboard = list()
+    callback_data = {
+        'n': 9,
+        'id': '',
+        'b': False
+    }
+    open_orders = 0
+    completed_orders = 0
+    if user_orders:
+        statuses = user_orders.values(
+            'status__name', 'status__id'
+        ).annotate(count=Count('status'))
+        for status in statuses:
+            if status['status__name'] == 'Open':
+                open_orders = status['count']
+            if status['status__name'] == 'Completed':
+                completed_orders = status['count']
+            callback_data.update({'id': status['status__id']})
+            keyboard.append([
+                InlineKeyboardButton(
+                f"({status['count']}) {status['status__name']} Gifts", 
+                callback_data=str(callback_data))
+            ])
+                
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=profile_msg['user_data'][LANG] % (
+                '@'+user.username, user.tg_id, 
+                user.language_code, user.currency,
+                open_orders, completed_orders
+            ),
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='HTML'
+    )
 
 
 def currency(update: Update, context: CallbackContext, user=None):
@@ -332,8 +369,9 @@ def amount(update: Update, context: CallbackContext, user=None):
     offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
     
     # create Order instance
+    open_status = PaymentStatus.objects.get(name='Open')
     GiftOrder.objects.update_or_create(
-        status='Open',
+        status=open_status,
         offer=offer,
         discount=offer.get_discount(),
         user=user
@@ -391,8 +429,9 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
     if not order:
         data = eval(update.callback_query.data)
         offer = Offer.objects.get(id=data['id'])
+        open_status = PaymentStatus.objects.get(name='Open')
         order, created = GiftOrder.objects.update_or_create(
-            status='Open',
+            status=open_status,
             offer=offer,
             discount=offer.get_discount(),
             user=user, 
@@ -483,8 +522,9 @@ def complete_payment(
     else:
         order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
         address = PaymentAddress.objects.get(id=eval(update.callback_query.data)['t'])
-
-    order.status = 'Pending'
+    
+    pending_status = PaymentStatus.objects.get(name='Pending')
+    order.status = pending_status
     order.price = order.get_price()
     order.save()
     
@@ -640,7 +680,7 @@ def messageHandler(update: Update, context: CallbackContext):
                 user_order = GiftOrder.objects.filter(
                     user=user,
                     offer=offer,
-                    status='Open'
+                    status__name='Open'
                 ).order_by('-created_at').first()
                 if user_order:
                     if int(order[1]) >= offer.offer_detail.fiat_amount_range_min and\
