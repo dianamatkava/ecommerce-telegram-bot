@@ -26,7 +26,7 @@ from bot_txt_conf import (
 from data.models import (
     Category, Subcategory, Offer, 
     TgUser, GiftOrder, PaymentAddress,
-    PaymentMethod, PaymentStatus
+    PaymentMethod, PaymentStatus, Payment
     )
 
 updater = Updater(TG_TOKEN, use_context=True)
@@ -425,7 +425,7 @@ def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
     elif user_gift.status.name in ['Processing', 'Payment Received']:
         gift_data_processing(update, context, user, user_gift)
         
-    elif user_gift.status.name == 'Complete':
+    elif user_gift.status.name == 'Completed':
         gift_data_processing(update, context, user, user_gift)
     
     if continue_name:
@@ -457,7 +457,7 @@ def gift_data_processing(
     method = order.payment_address.method.display_name
     faq = ''
     data = dict()
-    if order.status.name == 'Complete':
+    if order.status.name == 'Completed':
         qr_code = qrcode.make(order.gift_code)
         qr_code.save(f'static/data/img/{order.gift_code}')
         context.bot.send_photo(
@@ -573,7 +573,7 @@ def add_sender_payment_data(
     LANG = user.language_code
     user_order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
     method = user_order.payment_address.method.display_name
-    order_id = str(user_order.id)[0:4] + str(user_order.callback_id)
+    order_id = str(user_order.id)[0:4] + 'q' + str(user_order.callback_id)
     
     context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -884,15 +884,18 @@ def messageHandler(update: Update, context: CallbackContext):
                 unknown(update, context, user, order_msg['offer_not_found'][LANG])
         else:
             order_id, address = update.message.text.split(':')
-            order = GiftOrder.objects.filter(callback_id=order_id[-1])
+            order = GiftOrder.objects.filter(callback_id=order_id.split('q')[1])
             if order:
-                order[0].TxID = address
-                order[0].save()
-                method = order[0].payment_address.method.display_name
-                context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=profile_msg['identifier_saved'][method][LANG]
-                )
+                if GiftOrder.objects.filter(TxID=address):
+                    unknown(update, context, user, order_msg['txid_in_use'][LANG])
+                else:
+                    order[0].TxID = address
+                    order[0].save()
+                    method = order[0].payment_address.method.display_name
+                    context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text=profile_msg['identifier_saved'][method][LANG]
+                    )
             else:
                 # No active order found
                 unknown(update, context, user, order_msg['no_active_orders'][LANG])

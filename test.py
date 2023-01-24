@@ -8,18 +8,6 @@ load_dotenv()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # # ----- TEST BINANCE API -------
 
 

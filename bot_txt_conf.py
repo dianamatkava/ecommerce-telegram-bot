@@ -173,7 +173,11 @@ order_msg = {
     'invalid_amount': {
         'en': '<strong>Invalid Gift amount.</strong> \nNote that amount should be between: <strong>\n%s</strong> \nPlease enter Gift ID and amount separated by a colon\nExample: 123:50.\nYour Gift ID: <strong>%s</strong>',
         'ru': '<strong>Неверная сумма Гифта.</strong>\nПожалуйста введите ID Гифта и сумму через двоиточие\nПример: 123:50\nID вашего Гифта: <strong>%s</strong>'
-    }
+    },
+    'txid_in_use': {
+        'en': 'TxID/ID already in use',
+        'ru': 'TxID/ID уже используется'
+    },
 }
 
 

@@ -135,3 +135,57 @@ categories = [
     }
 ]
 
+payment_conf = {
+    'success': {
+        'en': '''
+Received payment for 
+<strong>%s</strong>
+
+Amount: <strong>%s</strong> <strong>%s</strong>
+<strong>%s</strong> amount: <strong>%s</strong>
+
+You will receive your Gift code within 15-30 min
+        ''',
+        'ru': '''
+Получена оплату за
+<strong>%s</strong>
+
+Сумма: <strong>%s</strong> <strong>%s</strong>
+<strong>%s</strong> сумма: <strong>%s</strong>
+
+Вы получите свой подарочный код в течение 15-30 мин.
+        '''
+    },
+    'fail': {
+        'en': '''
+Received payment for 
+<strong>%s</strong>
+
+Amount: <strong>%s</strong> <strong>%s</strong>
+<strong>%s</strong> amount: <strong>%s</strong>
+
+Amount is not correct
+        ''',
+        'ru': '''
+Получена оплату за
+<strong>%s</strong>
+
+Сумма: <strong>%s</strong> <strong>%s</strong>
+<strong>%s</strong> сумма: <strong>%s</strong>
+
+Сумма недостаточна
+        '''
+    }
+}
+
+admin_payment_conf = {
+    'payment': '''
+Received payment for 
+<strong>%s</strong>
+ID: <strong>%s</strong>
+
+Amount: <strong>%s</strong> <strong>%s</strong>
+<strong>%s</strong> amount: <strong>%s</strong>
+Status: <strong>%s</strong>
+    '''
+}

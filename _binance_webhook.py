@@ -24,7 +24,8 @@ import asyncio
 from binance import BinanceSocketManager
 from binance.client import AsyncClient
 from dotenv import load_dotenv
-from data.models import Payment, PaymentAddress
+from data.models import Payment, PaymentAddress, GiftOrder
+from .utils import get_fiat_amount
 
 load_dotenv()
 
@@ -62,6 +63,18 @@ class BinancePayment:
                         address = PaymentAddress.objects.filter(
                             address=tr['address']
                         )
+                        user = None
+                        fiat_amount = None
+                        order = GiftOrder.objects.filter(TxID=tr['txId'])
+                        if not order:
+                            order = None
+                        else:
+                            user = order.user
+                            if msg['a'] != order.offer.buy_cur:
+                                fiat_amount = get_fiat_amount(
+                                order.offer.buy_cur, msg['a'], tr['amount']
+                            )
+                                
                         payment, created = Payment.objects.update_or_create(
                             bc_id=tr['id'],
                             TxID=tr['txId'],
@@ -70,7 +83,11 @@ class BinancePayment:
                                 'status': bool(tr['status']),
                                 'insert_time': tr['insertTime'],
                                 'amount': tr['amount'],
-                                'address': address
+                                'address': address,
+                                'order': order,
+                                'tg_user': user,
+                                'fiat_amount': fiat_amount,
+                                'currency': msg['a']
                             }
                         )
                         if created:

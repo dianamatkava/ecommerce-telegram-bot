@@ -163,6 +163,7 @@ class OfferDetail(models.Model):
 
 class TgUser(models.Model):
     tg_id = models.IntegerField()
+    chat_id = models.IntegerField(null=True)
     username = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     native_language_code = models.CharField(max_length=2)
@@ -221,8 +222,6 @@ class GiftOrder(models.Model):
         )
         if response.status_code == 200:
             return round(float(response.text) * self.get_price(), 8)
-        else:
-            return response.status_code
     
     def __str__(self):
         res = ''
@@ -287,29 +286,31 @@ class Payment(models.Model):
         (DEPOSIT, 'Deposit'),
         (WITHDRAW, 'Withdraw')
     ]
-    bc_id = models.CharField(max_length=255, null=True)
-    TxID = models.CharField(max_length=255, null=True)
+    bc_id = models.CharField(max_length=255, null=True, blank=True)
+    TxID = models.CharField(max_length=255, null=True, blank=True)
     amount = models.PositiveIntegerField()
+    fiat_amount = models.PositiveIntegerField(null=True, blank=True)
+    currency = models.CharField(max_length=255, null=True)
     address = models.ForeignKey(
         'PaymentAddress',
         db_column='payment_address_id',
         on_delete=models.SET_NULL,
-        null=True
+        null=True, blank=True
     )
     _type = models.CharField(max_length=255, choices=TYPE, default=DEPOSIT)
-    status = models.BooleanField(default=True, null=True)
+    status = models.BooleanField(default=True, null=True, blank=True)
     insert_time = models.CharField(max_length=255)
     order = models.ForeignKey(
         'GiftOrder',
         db_column='payment_id',
         on_delete=models.SET_NULL,
-        null=True
+        null=True, blank=True
     )
     tg_user = models.ForeignKey(
         'TgUser',
         db_column='tg_user_id',
         on_delete=models.SET_NULL,
-        null=True
+        null=True, blank=True
     )
     
     
