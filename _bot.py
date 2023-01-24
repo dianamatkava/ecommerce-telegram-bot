@@ -16,7 +16,7 @@ from telegram.ext.callbackcontext import CallbackContext
 from telegram.ext.commandhandler import CommandHandler
 from telegram.ext.messagehandler import MessageHandler
 from telegram.ext.filters import Filters
-from config import TG_TOKEN
+from config import TG_TOKEN, TRACK_LINK
 from bot_txt_conf import (
     currency_msg, lang_txt, description_txt, btns,
     category_msg, subcategory_msg, offer_msg, amount_msg,
@@ -409,6 +409,7 @@ def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
     continue_ = callback_data.copy()
     delete = callback_data.copy()
     delete.update({'id': user_gift.callback_id, 'n': 10})
+    continue_name = False
     keyboard = [
         [InlineKeyboardButton(btns['terms_of_use'][LANG], callback_data=str(callback_data))],
         [InlineKeyboardButton('Delete', callback_data=str(delete))], []
@@ -421,32 +422,75 @@ def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
         continue_.update({'n': 11, 'id': user_gift.callback_id})
         continue_name = 'pending'
         
-        
-        
-    elif user_gift.status.name == 'Processing':
-        continue_.update({'n': 6, 'id': user_gift.offer.id})
-        continue_name = 'pending'
-        del keyboard[1]
+    elif user_gift.status.name in ['Processing', 'Payment Received']:
+        gift_data_processing(update, context, user, user_gift)
         
     elif user_gift.status.name == 'Complete':
-        continue_.update({'n': 6, 'id': user_gift.offer.id})
-        continue_name = 'amount'
-        del keyboard[1]
+        gift_data_processing(update, context, user, user_gift)
     
-    keyboard.append([
-        InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
-        InlineKeyboardButton(btns[continue_name][LANG], callback_data=str(continue_))
-    ])
-    
+    if continue_name:
+        keyboard.append([
+            InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
+            InlineKeyboardButton(btns[continue_name][LANG], callback_data=str(continue_))
+        ])
+    else:
+        keyboard.append([
+            InlineKeyboardButton(btns['back'][LANG], callback_data=str(back))
+        ])
+    if continue_name:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=profile_msg['user_gift_data'][LANG] % (
+                offer.__str__(), str(user_gift.amount), 
+                str(user_gift.get_price()), user_gift.offer.buy_cur
+            ),
+            reply_markup=InlineKeyboardMarkup(keyboard), 
+            parse_mode='HTML'
+        ) 
+
+
+def gift_data_processing(
+    update: Update, context: CallbackContext, user=None, order=None
+):
+    LANG = user.language_code
+    status = order.status.name if LANG == 'en' else order.status.ru_name,
+    method = order.payment_address.method.display_name
+    faq = ''
+    data = dict()
+    if order.status.name == 'Complete':
+        qr_code = qrcode.make(order.gift_code)
+        qr_code.save(f'static/data/img/{order.gift_code}')
+        context.bot.send_photo(
+            chat_id=update.effective_chat.id, 
+            photo=open(f'static/data/img/{order.gift_code}', 'rb')
+        )
+        faq = order.offer.subcategory.faq
+        if faq:
+            param = f"{offer_msg['faq'][LANG][3::]}: {faq}"
+        data = {
+            'name': 'complete', 
+            'params': (
+                order.__str__(), order.gift_code,
+                status[0], order.amount, faq
+            )
+        }
+    else:
+        track_link = None
+        if method == 'Crypto':
+            track_link = '/'.join([TRACK_LINK, order.payment_address.name.lower(), order.TxID])
+        param = profile_msg['track_payment'][LANG] % track_link if method == 'Crypto' else None
+        data = {
+            'name': 'processing', 
+            'params': (
+                order.__str__(), status[0], order.amount, 
+                order.price, order.offer.buy_cur, param
+            )
+        }
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=profile_msg['user_gift_data'][LANG] % (
-            offer.__str__(), str(user_gift.amount), 
-            str(user_gift.get_price()), user_gift.offer.buy_cur
-        ),
-        reply_markup=InlineKeyboardMarkup(keyboard), 
+        text=profile_msg[data['name']][LANG] % data['params'],
         parse_mode='HTML'
-    ) 
+    )
 
 
 def offer_desc(update: Update, context: CallbackContext, user=None):

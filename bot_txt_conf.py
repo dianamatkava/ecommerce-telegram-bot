@@ -364,6 +364,53 @@ Yout Order ID: <strong>%s</strong>
             'ru': 'TxID сохранен'
         }
     },
+    'processing': {
+        'en': '''
+<strong>%s</strong>
+
+Status: <strong>%s</strong>
+
+Selected amount <strong>%s</strong>
+The total price, including discount: 
+<strong>%s</strong> <strong>%s</strong>.
+%s
+        ''',
+        'ru': '''
+<strong>%s</strong>
+
+Status: <strong>%s</strong>
+
+Выбранная сумма <strong>%s</strong>
+Общая стоимость с учетом скидки: 
+<strong>%s</strong> <strong>%s</strong>.
+%s
+        '''
+    },
+    'complete': {
+        'en': '''
+<strong>%s</strong>
+Gift code: <strong>%s</strong>
+
+Status: <strong>%s</strong> 
+Amount <strong>%s</strong>
+%s
+        ''',
+        'ru': '''
+<strong>%s</strong>
+Код Гифта: <strong>%s</strong>
+
+Статус: <strong>%s</strong>
+
+Выбранная сумма <strong>%s</strong>
+Общая стоимость с учетом скидки: 
+<strong>%s</strong> <strong>%s</strong>.
+%s
+        '''
+    },
+    'track_payment': {
+        'en': 'Track your payment: %s',
+        'ru': 'Отследить платеж: %s'
+    },
     'delete': {
         'en': 'Gift %s was deleted',
         'ru': 'Гифт %s удален'
@@ -457,5 +504,5 @@ operations = {
     8: 'complete',
     9: 'user_gifts',
     10: 'delete',
-    11: 'sender_payment_data'
+    11: 'sender_payment_data',
 }

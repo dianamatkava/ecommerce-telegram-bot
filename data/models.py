@@ -200,6 +200,7 @@ class GiftOrder(models.Model):
         db_column='tg_user_id',
         on_delete=models.CASCADE
     )
+    gift_code = models.CharField(max_length=255, null=True, blank=True)
     TxID = models.CharField(max_length=255, null=True, blank=True)
     payment_address = models.ForeignKey(
         'PaymentAddress', 
