@@ -133,6 +133,35 @@ def profile(update: Update, context: CallbackContext, user=None):
     )
 
 
+def user_gifts(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    user_gifts = GiftOrder.objects.filter(
+        user=user, status__id=eval(update.callback_query.data)['id']
+    )
+    keyboard = list()
+    callback_data = {
+        'n': 3,
+        'id': '',
+        'b': False,
+        't': 0
+    }
+    for gift in user_gifts:
+        callback_data.update({'id': gift.callback_id})
+        keyboard.append([
+            InlineKeyboardButton(
+            gift.offer.__str__(), 
+            callback_data=str(callback_data))
+        ])
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=profile_msg['user_gifts'][LANG] % (
+            gift.status.name if LANG == 'en' else gift.status.ru_name
+        ),
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
 def currency(update: Update, context: CallbackContext, user=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
@@ -318,10 +347,7 @@ def offers(update: Update, context: CallbackContext, user=None):
         )
 
 
-def offer_desc(update: Update, context: CallbackContext, user=None):
-    if not user:
-        user = TgUser.objects.get(tg_id=update.message.from_user.id)
-    LANG = user.language_code
+def offer_desc_data(update: Update, context: CallbackContext, user, LANG):
     offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
     callback_data = {
         'n': 5,
@@ -360,7 +386,72 @@ def offer_desc(update: Update, context: CallbackContext, user=None):
         ),
         reply_markup=InlineKeyboardMarkup(keyboard), 
         parse_mode='HTML'
+    )   
+
+
+def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
+    user_gift = GiftOrder.objects.get(
+        callback_id=eval(update.callback_query.data)['id']
     )
+    callback_data = {
+        'n': 5,
+        'id': user_gift.status.id,
+        'b': False
+    }
+    back = callback_data.copy()
+    back.update({'b': True, 't': 9})
+    continue_ = callback_data.copy()
+    
+    if user_gift.status.name == 'Open':
+        continue_.update({'n': 6, 'id': user_gift.offer.id})
+    elif user_gift.status.name == 'Pending':
+        pass
+    elif user_gift.status.name == 'Payment Received':
+        pass
+    elif user_gift.status.name == 'Complete':
+        pass
+    
+    
+    
+    keyboard = [
+        [InlineKeyboardButton(btns['terms_of_use'][LANG], callback_data=str(callback_data))],
+        [
+            InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
+            InlineKeyboardButton(btns['continue'][LANG], callback_data=str(continue_))
+        ]
+    ]
+    warranty = offer_msg['warranty']['msg'][LANG]
+    if user_gift.offer.warranty:
+        warranty = user_gift.offer.warranty.split(' ')
+        if offer_msg['warranty']['time'].get(warranty[1], None):
+            warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
+    
+    country = user_gift.offer.currency.country if user_gift.offer.currency.country \
+                else offer_msg['country'][LANG] % user_gift.offer.currency.code
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=offer_msg['desc'][LANG] % (
+            user_gift.offer.__str__(), 
+            warranty, 
+            country,
+            user_gift.offer.display_amount(), 
+            offer_msg['faq'][LANG] % user_gift.offer.subcategory.faq if user_gift.offer.subcategory.faq else '' 
+        ),
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode='HTML'
+    ) 
+
+
+def offer_desc(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    
+    if eval(update.callback_query.data)['t'] == 0:
+        user_offer_desc(update, context, user, LANG)
+    else:
+        offer_desc_data(update, context, user, LANG)
+        
 
 def amount(update: Update, context: CallbackContext, user=None):
     if not user:
@@ -625,6 +716,7 @@ msg_handler = {
     'amount': amount,
     'address': payment_address,
     'complete': complete_payment,
+    'user_gifts': user_gifts,
 
     # RU
     'Помощь': help,

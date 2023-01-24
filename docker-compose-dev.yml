@@ -29,7 +29,7 @@ services:
       - .:/src
     restart: always
 
-
+  # Binance stream
   binance:
     build: .
     environment:
@@ -40,7 +40,7 @@ services:
     restart: always
     command: python _binance_webhook.py
 
-  # Celery
+  # Celery worker/beat
   redis:
     image: redis:alpine
     ports:

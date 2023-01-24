@@ -79,7 +79,7 @@ offer_msg = {
 
 - - - - - ВАЖНАЯ ИНФОРМАЦИЯ - - - - -
 
-1. Гарантийный срок (время использования): до <strong>%s</strong>
+1. Гарантийный срок (время использования): <strong>%s</strong>
 2. Ограничение по региону: <strong>только %s</strong>
 3. Номиналы: <strong>%s</strong>
 %s
@@ -305,10 +305,6 @@ Completed Orders: <strong>%s</strong>
 Открытые Гифты: <strong>%s</strong>
 Полученые Гифты: <strong>%s</strong>
         '''
-    },
-    'user_gifts': {
-        'en': 'Your %s Gifts',
-        'ru': 'Ваши %s Гифты'
     }
 }
 
