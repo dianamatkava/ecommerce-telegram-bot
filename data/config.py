@@ -179,7 +179,7 @@ Amount is not correct
 }
 
 admin_payment_conf = {
-    'payment': '''
+    'payment_complete': '''
 Received payment for 
 <strong>%s</strong>
 ID: <strong>%s</strong>
@@ -187,5 +187,9 @@ ID: <strong>%s</strong>
 Amount: <strong>%s</strong> <strong>%s</strong>
 <strong>%s</strong> amount: <strong>%s</strong>
 Status: <strong>%s</strong>
+    ''',
+    'payment': '''
+Received payment 
+Amount: <strong>%s</strong> <strong>%s</strong>
     '''
 }
