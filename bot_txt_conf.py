@@ -309,6 +309,64 @@ Completed Orders: <strong>%s</strong>
     'user_gifts': {
         'en': 'Your %s Gifts',
         'ru': 'Ваши %s Гифты'
+    },
+    'user_gift_data': {
+        'en': '''
+<strong>%s</strong>
+Selected amount <strong>%s</strong>
+The total price, including discount: 
+<strong>%s</strong> <strong>%s</strong>.
+        ''',
+        'ru': '''
+<strong>%s</strong>
+Выбранная сумма <strong>%s</strong>
+Общая стоимость с учетом скидки: 
+<strong>%s</strong> <strong>%s</strong>.
+        '''
+    },
+    'payment_identifier': {
+        'PayPal': {
+            'en': '''
+Enter your <strong>PayPal address</strong>
+Please enter <strong>Order ID</strong> and <strong>address</strong> separated by a colon\nExample: <strong>OrderID:PayPal address</strong>.
+Yout Order ID: <strong>%s</strong>
+            ''',
+            'ru': '''
+Введите свой <strong>адрес PayPal</strong>
+Введите идентификатор заказа и адрес PayPal, разделенные двоеточием.\nПример: <strong>OrderID:адрес PayPal</strong>.
+Идентификатор вашего заказа: <strong>%s</strong>
+            '''
+        },
+        'Crypto': {
+            'en': '''
+Enter your <strong>TxID</strong>
+Please enter Order ID and amount separated by a colon\nExample: OrderID:TxID.
+Yout Order ID: <strong>%s</strong>
+
+<strong>NOTE</strong>: <strong>TxID</strong> consists of Latin letters and numbers, for Binance only numbers
+            ''',
+            'ru': '''
+Введите свой <strong>TxID</strong>
+Введите идентификатор заказа и сумму, разделенные двоеточием\nПример: OrderID:TxID.
+Идентификатор вашего заказа: <strong>%s</strong>
+
+<strong>ПРИМЕЧАНИЕ</strong>: <strong>TxID</strong> состоит из латинских букв и цифр, для Binance только цифры
+            '''
+        }
+    },
+    'identifier_saved': {
+        'PayPal': {
+            'en': 'PayPal address saved',
+            'ru': 'Aдрес PayPal сохранен'
+        },
+        'Crypto': {
+            'en': 'TxID saved',
+            'ru': 'TxID сохранен'
+        }
+    },
+    'delete': {
+        'en': 'Gift %s was deleted',
+        'ru': 'Гифт %s удален'
     }
 }
 
@@ -365,6 +423,16 @@ btns = {
         'en': 'Continue',
         'ru': 'Продолжить'
     },
+    'amount': {
+        'en': 'Change amount',
+        'ru': 'Изменить сумму'
+    },
+    'pending': {
+        'en': '+ address/TxID',
+        'ru': '+ адрес/TxID'
+    },
+    
+    
     'terms_of_use': {
         'en': 'Terms of use',
         'ru': 'Условия использования'
@@ -387,5 +455,7 @@ operations = {
     6: 'amount',
     7: 'address',
     8: 'complete',
-    9: 'user_gifts'
+    9: 'user_gifts',
+    10: 'delete',
+    11: 'sender_payment_data'
 }

@@ -201,6 +201,12 @@ class GiftOrder(models.Model):
         on_delete=models.CASCADE
     )
     TxID = models.CharField(max_length=255, null=True, blank=True)
+    payment_address = models.ForeignKey(
+        'PaymentAddress', 
+        db_column='payment_address_id',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     
     def get_price(self):
         return self.amount - (self.amount * self.discount / 100)
@@ -218,7 +224,11 @@ class GiftOrder(models.Model):
             return response.status_code
     
     def __str__(self):
-        return f"{self.status} / {self.user.username} / {self.offer.subcategory.name}"
+        res = ''
+        if self.payment_address:
+            res += self.payment_address.name
+        res += f" {int(self.discount)}% {self.offer.subcategory.name} {self.amount} {self.offer.buy_cur}"
+        return res
 
 
 class CurrencyDetail(models.Model):

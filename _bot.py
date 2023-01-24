@@ -151,7 +151,7 @@ def user_gifts(update: Update, context: CallbackContext, user=None):
         callback_data.update({'id': gift.callback_id})
         keyboard.append([
             InlineKeyboardButton(
-            gift.offer.__str__(), 
+            gift.__str__(), 
             callback_data=str(callback_data))
         ])
     context.bot.send_message(
@@ -347,6 +347,18 @@ def offers(update: Update, context: CallbackContext, user=None):
         )
 
 
+def get_offer_restrictions(offer):
+    warranty = offer_msg['warranty']['msg'][LANG]
+    if offer.warranty:
+        warranty = offer.warranty.split(' ')
+        if offer_msg['warranty']['time'].get(warranty[1], None):
+            warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
+    
+    country = offer.currency.country if offer.currency.country \
+                else offer_msg['country'][LANG] % offer.currency.code
+                
+    return warranty, country
+
 def offer_desc_data(update: Update, context: CallbackContext, user, LANG):
     offer = Offer.objects.get(id=eval(update.callback_query.data)['id'])
     callback_data = {
@@ -367,14 +379,7 @@ def offer_desc_data(update: Update, context: CallbackContext, user, LANG):
         ]
     ]
     
-    warranty = offer_msg['warranty']['msg'][LANG]
-    if offer.warranty:
-        warranty = offer.warranty.split(' ')
-        if offer_msg['warranty']['time'].get(warranty[1], None):
-            warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
-    
-    country = offer.currency.country if offer.currency.country \
-                else offer_msg['country'][LANG] % offer.currency.code
+    warranty, country = get_offer_restrictions(offer)
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=offer_msg['desc'][LANG] % (
@@ -393,6 +398,7 @@ def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
     user_gift = GiftOrder.objects.get(
         callback_id=eval(update.callback_query.data)['id']
     )
+    offer = Offer.objects.get(id=user_gift.offer.id)
     callback_data = {
         'n': 5,
         'id': user_gift.status.id,
@@ -401,41 +407,42 @@ def user_offer_desc(update: Update, context: CallbackContext, user, LANG):
     back = callback_data.copy()
     back.update({'b': True, 't': 9})
     continue_ = callback_data.copy()
-    
-    if user_gift.status.name == 'Open':
-        continue_.update({'n': 6, 'id': user_gift.offer.id})
-    elif user_gift.status.name == 'Pending':
-        pass
-    elif user_gift.status.name == 'Payment Received':
-        pass
-    elif user_gift.status.name == 'Complete':
-        pass
-    
-    
-    
+    delete = callback_data.copy()
+    delete.update({'id': user_gift.callback_id, 'n': 10})
     keyboard = [
         [InlineKeyboardButton(btns['terms_of_use'][LANG], callback_data=str(callback_data))],
-        [
-            InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
-            InlineKeyboardButton(btns['continue'][LANG], callback_data=str(continue_))
-        ]
+        [InlineKeyboardButton('Delete', callback_data=str(delete))], []
     ]
-    warranty = offer_msg['warranty']['msg'][LANG]
-    if user_gift.offer.warranty:
-        warranty = user_gift.offer.warranty.split(' ')
-        if offer_msg['warranty']['time'].get(warranty[1], None):
-            warranty = warranty[0] + " " + offer_msg['warranty']['time'][warranty[1]][LANG]
+    if user_gift.status.name == 'Open':
+        continue_.update({'n': 6, 'id': user_gift.offer.id})
+        continue_name = 'amount'
+        
+    elif user_gift.status.name == 'Pending':
+        continue_.update({'n': 11, 'id': user_gift.callback_id})
+        continue_name = 'pending'
+        
+        
+        
+    elif user_gift.status.name == 'Processing':
+        continue_.update({'n': 6, 'id': user_gift.offer.id})
+        continue_name = 'pending'
+        del keyboard[1]
+        
+    elif user_gift.status.name == 'Complete':
+        continue_.update({'n': 6, 'id': user_gift.offer.id})
+        continue_name = 'amount'
+        del keyboard[1]
     
-    country = user_gift.offer.currency.country if user_gift.offer.currency.country \
-                else offer_msg['country'][LANG] % user_gift.offer.currency.code
+    keyboard.append([
+        InlineKeyboardButton(btns['back'][LANG], callback_data=str(back)),
+        InlineKeyboardButton(btns[continue_name][LANG], callback_data=str(continue_))
+    ])
+    
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=offer_msg['desc'][LANG] % (
-            user_gift.offer.__str__(), 
-            warranty, 
-            country,
-            user_gift.offer.display_amount(), 
-            offer_msg['faq'][LANG] % user_gift.offer.subcategory.faq if user_gift.offer.subcategory.faq else '' 
+        text=profile_msg['user_gift_data'][LANG] % (
+            offer.__str__(), str(user_gift.amount), 
+            str(user_gift.get_price()), user_gift.offer.buy_cur
         ),
         reply_markup=InlineKeyboardMarkup(keyboard), 
         parse_mode='HTML'
@@ -464,8 +471,10 @@ def amount(update: Update, context: CallbackContext, user=None):
     GiftOrder.objects.update_or_create(
         status=open_status,
         offer=offer,
-        discount=offer.get_discount(),
-        user=user
+        user=user,
+        defaults={
+            'discount':offer.get_discount(),
+        }
     )
     
     callback_data = {
@@ -511,7 +520,24 @@ def amount(update: Update, context: CallbackContext, user=None):
             parse_mode='HTML'
         )
         
-
+        
+def add_sender_payment_data(
+    update: Update, context: CallbackContext, user=None
+):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    user_order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
+    method = user_order.payment_address.method.display_name
+    order_id = str(user_order.id)[0:4] + str(user_order.callback_id)
+    
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=profile_msg['payment_identifier'][method][LANG] % order_id,
+        parse_mode='HTML'
+    )
+    
+    
 def payments_method(update: Update, context: CallbackContext, user=None, order: GiftOrder=None):
     if not user:
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
@@ -524,9 +550,11 @@ def payments_method(update: Update, context: CallbackContext, user=None, order: 
         order, created = GiftOrder.objects.update_or_create(
             status=open_status,
             offer=offer,
-            discount=offer.get_discount(),
             user=user, 
-            defaults={'amount': data['a']}
+            defaults={
+                'amount': data['a'],
+                'discount': offer.get_discount()
+            }
         )
         
     methods = PaymentMethod.objects.filter(is_active=True)
@@ -617,6 +645,7 @@ def complete_payment(
     pending_status = PaymentStatus.objects.get(name='Pending')
     order.status = pending_status
     order.price = order.get_price()
+    order.payment_address = address
     order.save()
     
     params = [
@@ -671,6 +700,19 @@ def terms_of_use(update: Update, context: CallbackContext, user=None):
         reply_markup=InlineKeyboardMarkup(keyboard), 
         parse_mode='HTML'
     )
+
+
+def delete_user_order(update: Update, context: CallbackContext, user=None):
+    if not user:
+        user = TgUser.objects.get(tg_id=update.message.from_user.id)
+    LANG = user.language_code
+    user_order = GiftOrder.objects.get(callback_id=eval(update.callback_query.data)['id'])
+    gift_name = user_order.__str__()
+    user_order.delete()
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=profile_msg['delete'][LANG] % gift_name
+    )
     
 
 def update_lang(lang:str, update: Update, user=None):
@@ -717,6 +759,8 @@ msg_handler = {
     'address': payment_address,
     'complete': complete_payment,
     'user_gifts': user_gifts,
+    'delete': delete_user_order,
+    'sender_payment_data': add_sender_payment_data,
 
     # RU
     'Помощь': help,
@@ -794,6 +838,20 @@ def messageHandler(update: Update, context: CallbackContext):
             else:
                 # Offer by this ID not found
                 unknown(update, context, user, order_msg['offer_not_found'][LANG])
+        else:
+            order_id, address = update.message.text.split(':')
+            order = GiftOrder.objects.filter(callback_id=order_id[-1])
+            if order:
+                order[0].TxID = address
+                order[0].save()
+                method = order[0].payment_address.method.display_name
+                context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=profile_msg['identifier_saved'][method][LANG]
+                )
+            else:
+                # No active order found
+                unknown(update, context, user, order_msg['no_active_orders'][LANG])
     else:
         offers = Offer.objects.all()
         currencies = list(offers.values_list('buy_cur', flat=True))
