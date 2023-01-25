@@ -15,3 +15,5 @@ def get_fiat_amount(currency, coin, price):
     if response.status_code == 200:
         return round(float(response.text) * price, 8)
     
+    
+print(get_fiat_amount('BTC', 'USD', 0.00443595))

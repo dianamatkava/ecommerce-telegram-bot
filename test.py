@@ -125,3 +125,7 @@ load_dotenv()
 
 
 
+# from data.models import Payment, PaymentAddress
+# ad = PaymentAddress.objects.all()[1]
+# p = Payment.objects.create(TxID='123', amount=0.1195422, currency='ETH', address=ad, _type='deposit', insert_time='123456')
+

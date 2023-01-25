@@ -91,6 +91,7 @@ class BinancePayment:
                             }
                         )
                         if created:
+                            payment.save()
                             print(f'CREATED new payment {payment}')
                 print(msg)
 

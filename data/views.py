@@ -13,7 +13,7 @@ load_dotenv()
 @csrf_exempt
 def home(request):
     if request.method == 'POST':
-        URL = os.getenv('TEST_PAYPAL_IPN') #'PAYPAL_IPN', 
+        URL = os.getenv('PAYPAL_IPN')
         params = {'cmd': '_notify-validate'}
         params.update(request.POST.dict())
         response = requests.post(URL, params=params)
@@ -21,7 +21,7 @@ def home(request):
         if response.text == 'VERIFIED':
             amount = request.POST.get('mc_gross')
             status = request.POST.get('payment_status', False)
-            payer_email = request.POST.get('payer_email')
+            txn_id = request.POST.get('txn_id')
             currency = request.POST.get('mc_currency')
             receiver_email = request.POST.get('receiver_email')
             payment_date = request.POST.get('payment_date')
@@ -31,7 +31,7 @@ def home(request):
                 user = None
                 fiat_amount = None
                 order = GiftOrder.objects.filter(
-                    TxID=payer_email
+                    TxID=txn_id
                 )
                 if not order:
                     order = None
@@ -49,7 +49,7 @@ def home(request):
                     address = None
 
                 payment = Payment.objects.create(
-                    TxID=payer_email,
+                    TxID=txn_id,
                     amount=amount,
                     address=address[0],
                     status=status,
@@ -59,6 +59,7 @@ def home(request):
                     fiat_amount=fiat_amount,
                     currency=currency
                 )
+                payment.save()
 
     return HttpResponse(200)
 

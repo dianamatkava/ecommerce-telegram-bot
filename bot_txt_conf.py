@@ -219,8 +219,8 @@ Crypto Payments are fast and safe way to send crypto.
             'en': '''
 Billing address: <strong>%s</strong>
 
-<strong>NOTE.</strong> You need to attach sender address to your order
-To do this, go to <strong>"Profile" > "My Gifts" > "Pending"</strong>, select your order and specify your address
+<strong>NOTE.</strong> You need to attach payment ID to your order
+To do this, go to <strong>"Profile" > "My Gifts" > "Pending"</strong>, select your order and specify your payment ID
 
 We will then notify you that the payment has been received and send you a gift code.
 
@@ -232,8 +232,8 @@ The total price, including discount, will be
             'ru': '''
 Платежный адрес: <strong>%s</strong>
 
-<strong>ПРИМЕЧАНИЕ.</strong> К заказу необходимо добавить адрес отправителя.
-Для этого перейдите в раздел <strong>"Профиль" > "Мои подарки" > "В ожидании"</strong>, выберите свой заказ и укажите свой адрес.
+<strong>ПРИМЕЧАНИЕ.</strong> К заказу необходимо добавить ID платежа.
+Для этого перейдите в раздел <strong>"Профиль" > "Мои подарки" > "В ожидании"</strong>, выберите свой заказ и укажите свой ID платежа.
 
 Затем мы уведомим вас о получении платежа и отправим вам подарочный код.
 
@@ -332,12 +332,12 @@ The total price, including discount:
         'PayPal': {
             'en': '''
 Enter your <strong>PayPal address</strong>
-Please enter <strong>Order ID</strong> and <strong>address</strong> separated by a colon\nExample: <strong>OrderID:PayPal address</strong>.
+Please enter <strong>Order ID</strong> and <strong>payment ID</strong> separated by a colon\nExample: <strong>OrderID:payment ID</strong>.
 Yout Order ID: <strong>%s</strong>
             ''',
             'ru': '''
 Введите свой <strong>адрес PayPal</strong>
-Введите идентификатор заказа и адрес PayPal, разделенные двоеточием.\nПример: <strong>OrderID:адрес PayPal</strong>.
+Введите идентификатор заказа и ID платежа, разделенные двоеточием.\nПример: <strong>OrderID:ID платежа</strong>.
 Идентификатор вашего заказа: <strong>%s</strong>
             '''
         },
@@ -360,8 +360,8 @@ Yout Order ID: <strong>%s</strong>
     },
     'identifier_saved': {
         'PayPal': {
-            'en': 'PayPal address saved',
-            'ru': 'Aдрес PayPal сохранен'
+            'en': 'PayPal payment ID saved',
+            'ru': 'ID платежа сохранен'
         },
         'Crypto': {
             'en': 'TxID saved',
@@ -377,6 +377,7 @@ Status: <strong>%s</strong>
 Selected amount <strong>%s</strong>
 The total price, including discount: 
 <strong>%s</strong> <strong>%s</strong>.
+
 %s
         ''',
         'ru': '''

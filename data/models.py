@@ -288,8 +288,8 @@ class Payment(models.Model):
     ]
     bc_id = models.CharField(max_length=255, null=True, blank=True)
     TxID = models.CharField(max_length=255, null=True, blank=True)
-    amount = models.PositiveIntegerField()
-    fiat_amount = models.PositiveIntegerField(null=True, blank=True)
+    amount = models.FloatField()
+    fiat_amount = models.FloatField(null=True, blank=True)
     currency = models.CharField(max_length=255, null=True)
     address = models.ForeignKey(
         'PaymentAddress',

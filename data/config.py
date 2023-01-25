@@ -1,3 +1,10 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+support = os.getenv('SUPPORT', None)
+
 paxful_conf = {
     'domain': 'https://paxful.com',
     'headers': {
@@ -157,7 +164,7 @@ You will receive your Gift code within 15-30 min
         '''
     },
     'fail': {
-        'en': '''
+        'en': f'''
 Received payment for 
 <strong>%s</strong>
 
@@ -165,8 +172,9 @@ Amount: <strong>%s</strong> <strong>%s</strong>
 <strong>%s</strong> amount: <strong>%s</strong>
 
 Amount is not correct
+Contact support: {support}
         ''',
-        'ru': '''
+        'ru': f'''
 Получена оплату за
 <strong>%s</strong>
 
@@ -174,6 +182,7 @@ Amount is not correct
 <strong>%s</strong> сумма: <strong>%s</strong>
 
 Сумма недостаточна
+Контактная поддержка: {support}
         '''
     }
 }
@@ -192,4 +201,32 @@ Status: <strong>%s</strong>
 Received payment 
 Amount: <strong>%s</strong> <strong>%s</strong>
     '''
+}
+
+profile_msg = {
+    'complete': {
+        'en': '''
+<strong>%s</strong>
+Gift code: <strong>%s</strong>
+
+Status: <strong>%s</strong> 
+Amount <strong>%s</strong>
+%s
+        ''',
+        'ru': '''
+<strong>%s</strong>
+Код Гифта: <strong>%s</strong>
+
+Статус: <strong>%s</strong>
+
+Выбранная сумма <strong>%s</strong>
+Общая стоимость с учетом скидки: 
+<strong>%s</strong> <strong>%s</strong>.
+%s
+        '''
+    },
+    'faq': {
+        'en': '4. Read more (FAQ): %s ',
+        'ru': '4. Подробнее (FAQ): %s'
+    },
 }
