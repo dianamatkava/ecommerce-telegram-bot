@@ -1,0 +1,9 @@
+build:
+  docker:
+    web: Dockerfile.prod
+  heroku:
+    app: vp_gifts
+    stack: container
+
+run:
+  web: docker-compose up

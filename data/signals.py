@@ -66,8 +66,6 @@ def order_complete(instance):
         faq = profile_msg['faq'][LANG][3::] % faq
     else:
         faq = ' '
-    print(
-            status, instance.amount, faq)
     updater.bot.sendMessage(
         chat_id=instance.user.chat_id,
         text=profile_msg['complete'][LANG] % (

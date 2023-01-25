@@ -839,7 +839,6 @@ msg_handler = {
 def optionsHandler(update: Update, context: CallbackContext):
     user = TgUser.objects.get(tg_id=update.callback_query.message.chat.id)
     data = eval(update.callback_query.data)
-    print(data)
     if data.get('b', None):
         msg_handler[operations[data['t']]](update, context, user)
     else:

@@ -1,0 +1,30 @@
+# pull official base image
+FROM python:3.9
+
+# set work directory
+WORKDIR /src
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV DEBUG 0
+
+# create workdir
+# RUN mkdir /src
+WORKDIR /src
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY requirements.txt /src
+RUN pip install -r requirements.txt
+
+# add and run as non-root user
+RUN adduser -D admin
+USER admin
+
+
+ENV TELEGRAM_TOKEN ${TELEGRAM_TOKEN}
+CMD python3 _bot.py
+
+
+COPY . /src
