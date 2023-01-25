@@ -63,20 +63,16 @@ def order_complete(instance):
     
     faq = instance.offer.subcategory.faq
     if faq:
-        param = f"{profile_msg['faq'][LANG][3::]}: {faq}"
+        faq = profile_msg['faq'][LANG][3::] % faq
     else:
         faq = ' '
-    data = {
-        'name': 'complete', 
-        'params': (
-            
-        )
-    }
+    print(
+            status, instance.amount, faq)
     updater.bot.sendMessage(
         chat_id=instance.user.chat_id,
         text=profile_msg['complete'][LANG] % (
             instance.__str__(), instance.gift_code,
-            status[0], instance.amount, faq
+            status, instance.amount, faq
         ),
         parse_mode='HTML'
     )

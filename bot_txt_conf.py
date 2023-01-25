@@ -405,10 +405,7 @@ Amount <strong>%s</strong>
 Код Гифта: <strong>%s</strong>
 
 Статус: <strong>%s</strong>
-
 Выбранная сумма <strong>%s</strong>
-Общая стоимость с учетом скидки: 
-<strong>%s</strong> <strong>%s</strong>.
 %s
         '''
     },
