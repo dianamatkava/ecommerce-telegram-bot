@@ -30,10 +30,11 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', None)
 DEBUG = True
 
 
-NGROK_DOMAIN = '8c3c-2a02-8109-a180-2bf4-aec0-906f-b485-a8dc.eu.ngrok.io'
+NGROK_DOMAIN = os.getenv('NGROK_DOMAIN')
+DOMAIN = os.getenv('DOMAIN')
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', NGROK_DOMAIN]
-CSRF_TRUSTED_ORIGINS = [f'https://{NGROK_DOMAIN}','https://*.127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', NGROK_DOMAIN, DOMAIN]
+CSRF_TRUSTED_ORIGINS = [f'https://{NGROK_DOMAIN}', f'https://{DOMAIN}', 'https://*.127.0.0.1']
 
 
 # Application definition
