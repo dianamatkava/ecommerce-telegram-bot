@@ -20,12 +20,12 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'paxfull_gifts.settings'
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 django.setup()
 
+import requests
 import asyncio
 from binance import BinanceSocketManager
 from binance.client import AsyncClient
 from dotenv import load_dotenv
 from data.models import Payment, PaymentAddress, GiftOrder
-from .utils import get_fiat_amount
 
 load_dotenv()
 
@@ -33,6 +33,17 @@ load_dotenv()
 BINANCE_API_KEY = os.getenv('BINANCE_API_KEY', None)
 BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY', None)
 
+
+def get_fiat_amount(currency, coin, price):
+    URL = os.getenv('COINGATE_RATE_API', None)
+    headers = {"accept": "text/plain"}
+    response = requests.get(
+        '/'.join([URL, currency, coin]), 
+        headers=headers
+    )
+    if response.status_code == 200:
+        return round(float(response.text) * price, 8)
+    
 
 class BinancePayment:
     def __init__(self, async_client: AsyncClient = None):

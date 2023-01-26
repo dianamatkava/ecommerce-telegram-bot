@@ -16,13 +16,16 @@ services:
   web_run:
     extends:
       service: web
-    command: gunicorn myproject.wsgi --bind 0.0.0.0:8000
+    command: gunicorn paxfull_gifts.wsgi --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
 
   # telegram bot
   bot:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    
     environment:
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
     volumes:

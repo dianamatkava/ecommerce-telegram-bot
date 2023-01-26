@@ -27,8 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = os.getenv('DEBUG', True)
 
 NGROK_DOMAIN = os.getenv('NGROK_DOMAIN')
 DOMAIN = os.getenv('DOMAIN')
