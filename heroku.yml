@@ -1,9 +1,9 @@
 build:
   docker:
-    web: Dockerfile.prod
+    web: Dockerfile
   heroku:
     app: vp_gifts
     stack: container
 
 run:
-  web: docker-compose up
+  web: docker-compose -f docker-compose-prod.yml up
