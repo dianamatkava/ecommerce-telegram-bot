@@ -106,6 +106,7 @@ class Offer(models.Model):
         on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
     
     class Meta:
         ordering = ['-created_at']

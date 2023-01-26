@@ -167,7 +167,7 @@ def currency(update: Update, context: CallbackContext, user=None):
         user = TgUser.objects.get(tg_id=update.message.from_user.id)
     LANG = user.language_code
 
-    offers = Offer.objects.filter(margin__gte=15)
+    offers = Offer.objects.filter(margin__gte=15, is_active=True)
     currencies = list(set(offers.values_list('buy_cur', flat=True)))
     keyboard = list()
     callback_data = {
@@ -209,7 +209,7 @@ def category(update: Update, context: CallbackContext, user=None):
             user.currency = cur
             user.save()
             description(update, context, user, currency_msg['msg'][LANG] %cur)
-    offers = Offer.objects.filter(margin__gte=15).select_related('category')
+    offers = Offer.objects.filter(margin__gte=15, is_active=True).select_related('category')
     if user.currency !=  'ALL':
         offers = offers.filter(buy_cur=user.currency)
     if offers:
@@ -244,7 +244,8 @@ def subcategory(update: Update, context: CallbackContext, user=None):
         data['id'] = Offer.objects.get(id=data['id']).category.id
     offers = Offer.objects.filter(
         margin__gte=15,
-        category__id=data['id']
+        category__id=data['id'],
+        is_active=True
     ).select_related('subcategory')
     if user.currency != 'ALL':
         offers = offers.filter(buy_cur=user.currency)
@@ -308,7 +309,8 @@ def offers(update: Update, context: CallbackContext, user=None):
     LANG = user.language_code
     offers = Offer.objects.filter(
         margin__gte=15,
-        subcategory__id=eval(update.callback_query.data)['id']
+        subcategory__id=eval(update.callback_query.data)['id'],
+        is_active=True
     ).order_by('-margin').select_related('offer_detail')
     if user.currency != 'ALL':
         offers = offers.filter(buy_cur=user.currency)
@@ -857,7 +859,7 @@ def messageHandler(update: Update, context: CallbackContext):
     elif len(update.message.text.split(':')) == 2:
         order = update.message.text.split(':')
         if order[0].isdigit() and order[1].isdigit():
-            offer = Offer.objects.filter(id=order[0]).first()
+            offer = Offer.objects.filter(id=order[0], is_active=True).first()
             if offer:
                 user_order = GiftOrder.objects.filter(
                     user=user,
@@ -902,7 +904,7 @@ def messageHandler(update: Update, context: CallbackContext):
                 # No active order found
                 unknown(update, context, user, order_msg['no_active_orders'][LANG])
     else:
-        offers = Offer.objects.all()
+        offers = Offer.objects.filter(is_active=True)
         currencies = list(offers.values_list('buy_cur', flat=True))
         currencies.append('ALL')
         if update.message.text in set(currencies):

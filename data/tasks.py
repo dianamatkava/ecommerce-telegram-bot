@@ -158,7 +158,7 @@ def updatePaxfullOffers():
                         
             outdated_offers = Offer.objects.filter(sell_cur=code).exclude(px_id__in=offers)
             print(f'REMOVED {len(outdated_offers)} outdated offers')
-            outdated_offers.delete()
+            outdated_offers.update(is_active=False)
             print('UPDATING Paxful Offers END')
             if offer_desc:
                 updateOfferDescription(offer_desc)
