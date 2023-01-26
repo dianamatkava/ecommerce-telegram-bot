@@ -1,0 +1,10 @@
+build:
+  docker:
+    web: Dockerfile
+    worker: Dockerfile.bot
+  heroku:
+    app: vp-gifts
+    stack: container
+
+run:
+  web: docker-compose -f docker-compose-prod.yml up
