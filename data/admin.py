@@ -55,7 +55,7 @@ class OfferAdmin(admin.ModelAdmin):
     )
     
     list_display = [
-        'px_id', 'subcategory', 'sell_cur', 'buy_cur', 'margin',
+        'is_active', 'px_id', 'subcategory', 'sell_cur', 'buy_cur', 'margin',
         'username', 'score', 'user_timezone',  'category', 'created_at'
     ]
     list_filter = ['category', 'sell_cur', 'buy_cur', 'username']
