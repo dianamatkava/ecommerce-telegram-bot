@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 from .models import GiftOrder, Payment, PaymentAddress
 from .utils import get_fiat_amount
 
+from .tasks import updatePaxfullOffers
+
+
+
 load_dotenv()
 
 logging.basicConfig(filename='',    # /root/gunicorn.log
@@ -19,6 +23,10 @@ logging.basicConfig(filename='',    # /root/gunicorn.log
 
 logger = logging.getLogger(__name__)
 
+
+def update_offers(requests):
+    updatePaxfullOffers()
+    return HttpResponse(200)
 
 @csrf_exempt
 def ipn_listener(request):

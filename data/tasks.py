@@ -1,12 +1,13 @@
 import time
+
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
+
 from .config import paxful_conf
-from .utils import generate_url, str_to_dict, merge_lang, str2bool
-from .models import Category, Tag, Subcategory, Offer, OfferDetail, CurrencyDetail
-
-
+from .models import (Category, CurrencyDetail, Offer, OfferDetail, Subcategory,
+                     Tag)
+from .utils import generate_url, merge_lang, str2bool, str_to_dict
 
 logger = get_task_logger(__name__)
 
@@ -41,7 +42,7 @@ def update_offer(offer, data):
 
 @shared_task
 def updateOfferDescription(offers=None):
-    print('UPDATING ofer description')
+    print('UPDATING offer description')
     if not offers:
         offers = Offer.objects.all()
     x = 0
@@ -49,7 +50,7 @@ def updateOfferDescription(offers=None):
         res = requests.get(
             f'https://paxful.com/offer/{offers[x].px_id}', headers=HEADERS, verify=False
         )
-        print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].__str__()}\nStatus Code: {res.status_code}')
+        #print(f'[{x+1}] Updating Data for {offers[x].px_id, offers[x].username}\n{offers[x].__str__()}\nStatus Code: {res.status_code}')
         if res.status_code == 200:
             start = res.text.index('offerTerms')
             end = res.text.index('noCoins"')
@@ -71,7 +72,7 @@ def updateOfferDescription(offers=None):
             x += 1
         else:
             time.sleep(15)
-    print('UPDATING ofer description END')
+    print('UPDATING offer description END')
 
 
 @shared_task
@@ -89,11 +90,14 @@ def updatePaxfullOffers():
         res = requests.get(URL, headers=HEADERS, verify=False)
         if res.status_code == 200:
             data = str_to_dict(res.text)['data']
+            print(f'TOTAL: {len(data)} {code}')
             default_category = Category.objects.get(name='Other')
             offers = list()
+            
             for offer in data:
                 if offer['pricePerUsd'] >= 1.1:
                     offers.append(offer['idHashed'])
+                    
                     tags = list()
                     if offer['tags']:
                         ids = [tag['id'] for tag in offer['tags']]
@@ -127,8 +131,6 @@ def updatePaxfullOffers():
                     offer_detail, created = OfferDetail.objects.update_or_create(
                         px_id=offer['idHashed'], defaults=offer_detail_values
                     )
-                    if created:
-                        print(f'Created new obj of {offer_detail}')
                         
                     offer_values = {
                         'sell_cur': offer['cryptoCurrencyCode'],
@@ -147,6 +149,7 @@ def updatePaxfullOffers():
                         'user_timezone': offer['userTimezone'],
                         'offer_type': offer['offerType'],
                         'offer_detail': offer_detail,
+                        'is_active': True
                     }
                     offer, created = Offer.objects.update_or_create(
                         px_id=offer['idHashed'], defaults=offer_values
@@ -154,10 +157,12 @@ def updatePaxfullOffers():
                     offer.tags.set(tags)
                     if created:
                         offer_desc.append(offer)
-                        print(f'Created new obj of {offer}')
+                        print(f'CREATED {offer}')
                         
-            outdated_offers = Offer.objects.filter(sell_cur=code).exclude(px_id__in=offers)
-            print(f'REMOVED {len(outdated_offers)} outdated offers')
+            outdated_offers = Offer.objects.filter(sell_cur=code, is_active=True).exclude(px_id__in=offers)
+            print(f'RECEIVED: {len(offers)} | REMOVED: {len(outdated_offers)} | CREATED: {len(offer_desc)} offers.')
+            offers = Offer.objects.all()
+            print(f'ACTIVE: {len(offers.filter(is_active=True))} | INACTIVE: {len(offers.filter(is_active=False))}')
             outdated_offers.update(is_active=False)
             print('UPDATING Paxful Offers END')
             if offer_desc:

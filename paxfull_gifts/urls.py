@@ -22,12 +22,13 @@ from django.http import HttpResponse
 from django.urls import path
 from dotenv import load_dotenv
 
-from data.views import ipn_listener
+from data.views import ipn_listener, update_offers
 
 load_dotenv()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(os.getenv('IPN_LISTENER'), ipn_listener),
-    path('', lambda x: HttpResponse(200))
+    path('', lambda x: HttpResponse(200)),
+    path('update/', update_offers)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
