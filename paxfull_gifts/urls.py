@@ -13,17 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path
+from dotenv import load_dotenv
 
 from data.views import ipn_listener
 
+load_dotenv()
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('10e9212690d5eb0842e861f35732d8e91cac50c625376c7ac22909f85a5eaf45', ipn_listener),
+    path(os.getenv('IPN_LISTENER'), ipn_listener),
     path('', lambda x: HttpResponse(200))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
