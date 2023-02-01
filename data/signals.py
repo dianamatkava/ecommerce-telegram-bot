@@ -28,14 +28,15 @@ def notify_user(payment, order):
     tg_user = TgUser.objects.get(id=order.user.id)
     admins = list(TgUser.objects.filter(is_admin=True).values_list('chat_id', flat=True))
     
-    updater.bot.sendMessage(
-        chat_id=tg_user.chat_id, 
-        text=payment_conf[status][tg_user.language_code] % (
-            order.__str__(), payment.amount, payment.currency,
-            order.offer.buy_cur, fiat_amount, 
-        ),
-        parse_mode='HTML'
-    )
+    if tg_user.chat_id:
+        updater.bot.sendMessage(
+            chat_id=tg_user.chat_id, 
+            text=payment_conf[status][tg_user.language_code] % (
+                order.__str__(), payment.amount, payment.currency,
+                order.offer.buy_cur, fiat_amount, 
+            ),
+            parse_mode='HTML'
+        )
     for chat in admins:
         updater.bot.sendMessage(
             chat_id=chat, 

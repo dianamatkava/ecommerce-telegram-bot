@@ -37,6 +37,7 @@ LANG = 'en'
 def start(update: Update, context: CallbackContext, *args):
     username = getattr(update.message.from_user, 'username', 'unknown')
     values = {
+        'chat_id': update.message.from_user.id,
         'username': username,
         'first_name': update.message.from_user.first_name,
         'native_language_code': update.message.from_user.language_code,
