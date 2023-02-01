@@ -289,6 +289,7 @@ class Payment(models.Model):
     ]
     bc_id = models.CharField(max_length=255, null=True, blank=True)
     TxID = models.CharField(max_length=255, null=True, blank=True)
+    payer_email = models.CharField(max_length=255, blank=True, null=True)
     amount = models.FloatField()
     fiat_amount = models.FloatField(null=True, blank=True)
     currency = models.CharField(max_length=255, null=True)
@@ -299,7 +300,7 @@ class Payment(models.Model):
         null=True, blank=True
     )
     _type = models.CharField(max_length=255, choices=TYPE, default=DEPOSIT)
-    status = models.BooleanField(default=True, null=True, blank=True)
+    status = models.CharField(max_length=255, null=True, blank=True)
     insert_time = models.CharField(max_length=255)
     order = models.ForeignKey(
         'GiftOrder',

@@ -17,10 +17,13 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path
-from data.views import home
+
+from data.views import ipn_listener
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home)
+    path('10e9212690d5eb0842e861f35732d8e91cac50c625376c7ac22909f85a5eaf45', ipn_listener),
+    path('', lambda x: HttpResponse(200))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

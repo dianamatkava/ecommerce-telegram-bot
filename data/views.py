@@ -11,7 +11,7 @@ from .utils import get_fiat_amount
 
 load_dotenv()
 
-logging.basicConfig(filename='/root/gunicorn.log',
+logging.basicConfig(filename='',    # /root/gunicorn.log
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
-def home(request):
+def ipn_listener(request):
     if request.method == 'POST':
         URL = os.getenv('TEST_PAYPAL_IPN')
         params = {'cmd': '_notify-validate'}
@@ -38,16 +38,15 @@ def home(request):
         txn_id = request.POST.get('txn_id')
         currency = request.POST.get('mc_currency')
         receiver_email = request.POST.get('receiver_email')
+        payer_email = request.POST.get('payer_email')
         payment_date = request.POST.get('payment_date')
         logger.info(request.POST.__dict__)
-        logger.info(f'\n\n {status}')
-
-        if status == 'Completed':
+        logger.info(f'\nPayment to: {receiver_email}, FROM {payer_email}\n')
+        
+        if status.strip() == 'Completed':
             user = None
             fiat_amount = None
-            order = GiftOrder.objects.filter(
-                TxID=txn_id
-            )
+            order = GiftOrder.objects.filter(TxID=txn_id)
             if not order:
                 order = None
             else:
@@ -64,7 +63,7 @@ def home(request):
             payment = Payment.objects.create(
                 TxID=txn_id,
                 amount=amount,
-                address=address if address else None,
+                address=address[0] if address else None,
                 status=status,
                 insert_time=payment_date,
                 order=order,
@@ -72,7 +71,6 @@ def home(request):
                 fiat_amount=fiat_amount,
                 currency=currency
             )
-            payment.save()
 
     return HttpResponse(200)
 
