@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def home(request):
     if request.method == 'POST':
-        URL = os.getenv('PAYPAL_IPN')
+        URL = os.getenv('TEST_PAYPAL_IPN')
         params = {'cmd': '_notify-validate'}
         params.update(request.POST.dict())
         response = requests.post(URL, params=params)
@@ -60,13 +60,11 @@ def home(request):
             address = PaymentAddress.objects.filter(
                 address=receiver_email
             )
-            if not address:
-                address = None
 
             payment = Payment.objects.create(
                 TxID=txn_id,
                 amount=amount,
-                address=address[0],
+                address=address if address else None,
                 status=status,
                 insert_time=payment_date,
                 order=order,
