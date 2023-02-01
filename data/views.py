@@ -26,8 +26,6 @@ def home(request):
         URL = os.getenv('PAYPAL_IPN')
         params = {'cmd': '_notify-validate'}
         params.update(request.POST.dict())
-        logger.info(request.POST.__dict__())
-        logger.info(request.POST.get('mc_gross'))
         response = requests.post(URL, params=params)
         
         if response.text == 'VERIFIED':
