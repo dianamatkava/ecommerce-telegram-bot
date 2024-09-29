@@ -1,9 +1,9 @@
 # VPGifts
 
-A Telegram Ecommerce bot for listing and purchasing gifts, uncludes translation feature and cart, leveraging various technologies:
+A Telegram Ecommerce bot for listing and purchasing products, uncludes translation feature and cart, leveraging various technologies:
 
 - **Scraping Cron Job**: Automates data extraction with Beautifulsoup
-- **Telegram Ecommerce Bot**: Manages user interactions and gift purchases.
+- **Telegram Ecommerce Bot**: Manages user interactions and product purchases.
 - **Binance Listener**: Monitors cryptocurrency transactions.
 - **PostgresDB**: Stores user and transaction data.
 - **Django Admin**: Provides a third-party admin interface for management.
